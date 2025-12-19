@@ -1,7 +1,15 @@
 import { Link } from 'react-router-dom'
-import './form.css'
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import "./form.css";
+import { useState } from "react";
 
 const Form = () => {
+    const [visible, setVisible] = useState(false)
+    
+      const handleVisibility = () => {
+        setVisible(!visible)
+      }
   return (
             <div className='form'>
                 <div className='formContent'>
@@ -11,8 +19,13 @@ const Form = () => {
                         <input type="text" />
                     </div>
                     <div className="formField">
-                        <label htmlFor="userName">Password</label>
-                        <input type="text" />
+                        <label htmlFor="userPassword">Password</label>
+                        <input type={visible ? "text" : "password"} />
+                        {visible ? (
+                            (<VisibilityOffIcon onClick={handleVisibility} style={{alignSelf: "flex-end", cursor: "pointer"}}/>)
+                        ) : 
+                        <VisibilityIcon onClick={handleVisibility} style={{alignSelf: "flex-end", cursor: "pointer"}}/>
+                        }
                     </div>
                     
                     <button type="submit">Submit</button>

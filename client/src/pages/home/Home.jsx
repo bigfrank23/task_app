@@ -127,18 +127,26 @@ const Home = () => {
       <div className='home'>
         <div className="left">
           <div className="lTop">
-        <img src="/general/images/wp.jpg" alt="" className="lbCoverImg" />
-        <div className="lProfile">
-          <img src="/general/images/franklin.jpg" alt="" className="lProfileImg" />
+            <img src="/general/images/wp.jpg" alt="" className="lbCoverImg" />
+            <div className="lProfile">
+              <img src="/general/images/franklin.jpg" alt="" className="lProfileImg" />
+            </div>
+            <h3 className="lUsername">John Franklin</h3>
+            <p className="lUserTitle">Full Stack Developer</p>
+            <p className="lUserBio">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Corrupti deleniti a non error vero perspiciatis quisquam. Ea dolore deserunt magnam?</p>
+            <div className="lLocation">
+              <LocationPinIcon className='lLocationIcon'/>
+              <span>New York, USA</span>
+            </div>
         </div>
-        <h3 className="lUsername">John Franklin</h3>
-        <p className="lUserTitle">Full Stack Developer</p>
-        <p className="lUserBio">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Corrupti deleniti a non error vero perspiciatis quisquam. Ea dolore deserunt magnam?</p>
-        <div className="lLocation">
-          <LocationPinIcon className='lLocationIcon'/>
-          <span>New York, USA</span>
-        </div>
-      </div>
+            <div className="lBottom">
+              <div style={{display: "flex", justifyContent: "space-between", marginBottom: "5px"}}>
+                <p>Profile View</p>
+                <span>2</span>
+              </div>
+                
+              <p>View all Analytics</p>
+            </div>
         </div>
         <div className="middle">
             {
