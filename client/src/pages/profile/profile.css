@@ -1,0 +1,317 @@
+.profile{
+    /* display: grid;
+    grid-template-columns: .4fr 2.5fr 1fr .4fr;
+    grid-gap: 15px; */
+    display: flex;
+    gap: 50px;
+    padding: 0 50px;
+
+}
+
+.profileContainer{
+    flex: 2;
+    padding: 0px 0 16px 0;
+    height: 100%;
+}
+
+.prCard{
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    top: 50px;
+    padding-bottom: 16px;
+}
+
+.prActivity{
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    top: 50px;
+}
+
+.profileRight{
+    flex: 1;
+    position: relative;
+    top: 50px;
+}
+
+.bgCoverImg{
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: -40px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.profileImgBox{
+    position: absolute;
+    top: 95px;
+    left: 50px;
+}
+
+.profileImg{
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 4px solid #fff;
+}
+
+.profileContainerTxt{
+    margin-top: 100px;
+    padding: 16px;
+}
+
+.profileContainerTxt span{
+    font-size: 14px;
+    color: #878787;
+}
+
+.profileButton{
+    display: flex;
+    gap: 5px;
+    padding: 16px 0 0 16px;
+}
+
+.profileButton button:first-child{
+  background-color: #535bf2;
+  color: white;
+  border: none;
+  padding: 6px;
+}
+
+.profileButton button:hover:first-child{
+  background-color: #2932e2;
+}
+
+.profileButton button:last-child{
+  background-color: transparent;
+  color: #443333;
+  border: 2px solid #443333;
+  border-radius: 15px;
+}
+
+.profileButton button:hover:last-child{
+    background-color: rgba(0, 0, 0, 0.2); /* Key: Semi-transparent black background */
+    outline: 2px solid #333;
+    transition: .3s;
+}
+
+.profileButton button{
+    background-color: transparent;
+    color: #535bf2;
+    border: 2px solid #535bf2;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+    outline: 0 !important;
+    margin-top: 6px;
+    padding: 5px;
+    border-radius: 15px;
+}
+.profileButton button:hover{
+    background-color: rgba(179, 146, 247, 0.2); /* Key: Semi-transparent black background */
+    outline: 2px solid #535bf2;
+    transition: .3s;
+}
+
+.prBody{
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* padding: 15px 0 0 15px; */
+    border: 1px solid #e0e0e0;
+    /* display: flex;
+    gap: 20px; */
+    padding: 15px 20px 15px 20px;
+    /* margin-top: .6rem; */
+}
+
+.prBody h3{
+    margin-bottom: 10px;
+}
+
+.prBody .rBodyImg{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 6px 0;
+}
+
+.prBody .rBodyTitle{
+    color: #293138;
+    font-size: 1rem;
+}
+
+.prBody .rBodyPara{
+    font-size: 14px;
+    color: #38434f;
+}
+
+.prBody .rBodyFollowBtn{
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border: 1px solid #333;
+    outline: none;
+    border-radius: 15px;
+}
+
+.prBody .rBodyFollowBtn:hover{
+    background-color: rgba(0, 0, 0, 0.2); /* Key: Semi-transparent black background */
+    outline: 2px solid #333;
+    transition: .3s;
+}
+
+.prBody hr {
+  margin: 25px 0;
+  border: none;
+  height: 1px;
+  background-color: #e6e6e6;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+/* Activity */
+.prActivity{
+    margin-top: 23px;
+    padding: 16px;
+}
+
+.activityBtns{
+    display: flex;
+    gap: 7px;
+    margin-top: 16px;
+}
+
+.activityBtn{
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    border: thin solid #333;
+    border-radius: 15px;
+    padding: 6px;
+    cursor: pointer;
+}
+
+.activityBtn svg{
+    font-size: 13px;
+}
+
+/* Swipper */
+.activitySlide{
+    width: 700px;
+    height: 300px;
+    padding: 10px;
+}
+.activitySlide .swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.activitySlide .swiper-slide {
+  text-align: center;
+  font-size: 18px;
+  background: #444;
+
+  /* Center slide text vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.activitySlide .swiper-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Handlin Swipper contents */
+
+.truncateTxt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.activitySlide .swiper-slide img {
+    width: 23px;
+    height: 23px;
+    object-fit: cover;
+}
+
+.activitySlide .middleBody .middleBodyImgs .middleBodyImg {
+    width: 100%;
+    height: 100px;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+.activitySlide .middleHeader {
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+}
+
+.activitySlide .middleHeaderContent .middleHeaderTitle h4 {
+    font-size: 12px;
+}
+
+.activitySlide .middleHeader .middleHeaderContent {
+    display: flex;
+    /* gap: 11px; */
+}
+
+.activitySlide .middleHeaderContent .middleHeaderTitle p, .middleHeaderTitle span {
+    color: #56687a;
+    font-size: 10px;
+}
+
+.activitySlide middleBody .middleBodyTxt {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+.activitySlide .middleBody .middleBodyTxt .mbStatusPen{
+    text-align: end;
+    border: 1px solid #FFC107;
+    padding: 3px;
+    border-radius: 8px;
+    font-size: 8px;
+    color: #FFC107;
+    text-transform: capitalize;
+}
+
+.activitySlide .middleBody .middleBodyTxt .mbStatusCom {
+    text-align: end;
+    border: 1px solid #28A745;
+    padding: 3px;
+    border-radius: 8px;
+    font-size: 8px;
+    color: #28A745;
+    text-transform: capitalize;
+}
+
+.activitySlide .middleBody .middleBodyTxt .mbStatusLat {
+    text-align: end;
+    border: 1px solid #DC3545;
+    padding: 3px;
+    border-radius: 8px;
+    font-size: 8px;
+    color: #DC3545;
+    text-transform: capitalize;
+}
+
+.activitySlide .middleBodyReacts .mdComments span, .mdBodyIcons span {
+    align-self: center;
+    font-size: 10px;
+}

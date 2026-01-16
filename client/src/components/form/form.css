@@ -3,13 +3,14 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    margin: 5px 0;
 }
 
 .formContent{
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 40px;
+    gap: 5px;
+    padding: 30px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
@@ -32,12 +33,16 @@
 .formField{
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
+    /* margin-bottom: 15px; */
+}
+
+.formField label{
+    font-size: 14px;
 }
 
 .formField input{
-    padding: 10px;
-    font-size: 16px;
+    padding: 8px;
+    font-size: 12px;
     border: 2px solid #d0d0d0;
     border-radius: 5px;
     background-color: #f8f8ff;
@@ -82,17 +87,41 @@
     margin-left: 10px;
 }
 
-.formError{
-    color: red;
-    font-size: 14px;
-    margin-top: -10px;
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: #888;
+  font-size: 14px;
 }
 
-.formSuccess{
-    color: green;
-    font-size: 14px;
-    margin-top: -10px;
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ddd;
 }
+
+.divider span {
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+span.validationError{
+    color: red;
+    text-align: center;
+    border-left: 3px solid red;
+    margin: 3px 0;
+}
+
+.forgotPass{
+    margin-top: 8px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
 
 @media (max-width: 400px) {
     .formContent{

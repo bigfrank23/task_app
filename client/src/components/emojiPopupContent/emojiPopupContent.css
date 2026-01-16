@@ -1,0 +1,66 @@
+.popup-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font: 13px;
+  position: relative;
+}
+
+/* .popup-icons{
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    cursor: pointer;
+} */
+
+.popup-icons:hover{
+    color: rgb(47, 70, 75);
+    font-weight: 300;
+}
+
+.popup-icons:nth-child(2){
+    margin: 10px 0;
+}
+
+/* .popup-icons:last-child:hover{
+    color: rgb(231, 16, 16);
+} */
+
+/* Emoji popup */
+.emoji-popup {
+  position: absolute;
+  top: 50%;
+  left: 110%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 6px;
+  background: #fff;
+  padding: 6px 8px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.15s ease-in-out;
+  /* z-index: 100; */
+  pointer-events: auto;
+}
+
+.emoji {
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.emoji:hover {
+  transform: scale(1.3);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}

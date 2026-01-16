@@ -1,0 +1,246 @@
+.profile-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: #fff;
+}
+
+.profile-card h2 {
+  margin-bottom: 12px;
+}
+
+.file-input {
+  margin-bottom: 12px;
+}
+
+.preview-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #535bf2;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+/* Crop modal */
+.crop-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.crop-container {
+  background: white;
+  width: 400px;
+  height: 460px;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.crop-area {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: #333;
+}
+
+.crop-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.cover-preview {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+/* PasswordUpdateForm */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.form-group input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #535bf2;
+  box-shadow: 0 0 0 1px #535bf2;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.success-text {
+  color: #16a34a;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ProfileInfoForm */
+/* Profile form layout */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Inputs & textarea */
+.profile-form input,
+.profile-form textarea {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.profile-form textarea {
+  resize: vertical;
+}
+
+/* Focus styles */
+.profile-form input:focus,
+.profile-form textarea:focus {
+  outline: none;
+  border-color: #535bf2;
+  box-shadow: 0 0 0 1px #535bf2;
+}
+
+/* Section title */
+.profile-card h2 {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Button spacing */
+.profile-form button {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+.upload-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px dashed #cbd5e1;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.upload-icon-btn:hover {
+  background: #e5e7eb;
+}
+
+.upload-icon-btn svg {
+  font-size: 20px;
+}
+
+/* Hide native file input */
+.hidden-file-input {
+  display: none;
+}
+
+/* Drag & drop area */
+.drop-zone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.drop-zone.drag-active {
+  background: #eff6ff;
+  border-color: #2563eb;
+}
+
+.drop-zone p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* File name */
+.file-name {
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 6px;
+}
+
+/* Progress ring */
+.progress-ring {
+  width: 48px;
+  height: 48px;
+  margin-top: 12px;
+}
+
+.progress-ring circle {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.progress-ring-bg {
+  stroke: #e5e7eb;
+}
+
+.progress-ring-progress {
+  stroke: #2563eb;
+  transition: stroke-dashoffset 0.3s;
+}
+
+/* Hide native input */
+.hidden-file-input {
+  display: none;
+}
+

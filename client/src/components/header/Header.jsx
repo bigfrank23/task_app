@@ -7,10 +7,19 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
 import ProgressiveBar from '../progressiveBar/ProgressivBar';
+import SettingsIcon from '@mui/icons-material/Settings';
+import apiRequest from '../../utils/apiRequest';
+import {useNotification} from '../../utils/useNotification'
+import useAuthStore from '../../utils/authStore';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [query, setQuery] = useState('')
   const [dropDown, setDropDown] = useState(false)
+  const { showSuccess, showError } = useNotification()
+  const { logout } = useAuthStore();
+  const navigate = useNavigate()
+
 
 
   const handleChange = (e) => setQuery(e.target.value)
@@ -22,7 +31,23 @@ const Header = () => {
   }
 
   const toggleDropDown = () => {
-    setDropDown(!dropDown)
+    setDropDown((prev)=> !prev)
+  }
+
+  const handleClick = async() => {
+    try {
+      const res = apiRequest.post('/user/auth/logout')
+      logout()
+      showSuccess((await res).data.message)
+      setDropDown(false)
+      navigate('/signin')
+      
+    } catch (error) {
+      console.log(error);
+      showError(error?.response?.data?.message || "Something went wrong")
+      showError(error.message)
+      
+    }
   }
 
   return (
@@ -68,7 +93,8 @@ const Header = () => {
           {
             dropDown ? (
             <ul className="hrDropDown">
-                <li><p>Sign out</p></li>
+              <li id='settings'><SettingsIcon/> <p>Settings</p></li>
+                <li onClick={handleClick}><p>Sign out</p></li>
                 <li><p>Delete Account</p></li>
             </ul>
             ) : ""

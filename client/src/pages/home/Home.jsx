@@ -19,6 +19,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import Footer from '../../components/footer/Footer';
+import {Link} from 'react-router-dom'
 
 // Import Swiper styles
 import 'swiper/css';
@@ -39,7 +40,7 @@ const Home = () => {
       originalStatus: "pending",
       time: "2pm",
       deadline: "12-12-2024",
-      imgs: ["https://picsum.photos/200/300"],
+      imgs: ["general/images/wp.jpg"],
       vid: "",
       likes: 886,
       comment: 334,
@@ -71,7 +72,7 @@ const Home = () => {
       originalStatus: "pending",
       time: "9:34pm",
       deadline: "12-12-2024",
-      imgs: ["https://picsum.photos/200/300", "https://picsum.photos/200/300", "https://picsum.photos/200/300"],
+      imgs: ["general/images/wp.jpg", "general/images/wp.jpg", "general/images/wp.jpg"],
       vid: "",
       likes: 9895,
       comment: 76,
@@ -105,7 +106,7 @@ const Home = () => {
       originalStatus: "completed",
       time: "5:23am",
       deadline: "12-12-2024",
-      imgs: ["https://picsum.photos/200/300", "https://picsum.photos/200/300"],
+      imgs: ["/general/images/wp.jpg", "general/images/wp.jpg"],
       vid: "",
       likes: 35,
       comment: 76,
@@ -154,7 +155,9 @@ const Home = () => {
             <div className='middleContents'>
               <div className="middleHeader">
                 <div className='middleHeaderContent'>
-                  <img className='middleheaderUserImg' src={content.userImg} alt="" />
+                  <Link to={'/:profile'}>
+                    <img className='middleheaderUserImg' src={content.userImg} alt="" />
+                  </Link>
                   <div className="middleHeaderTitle">
                     <h4>{content.username}</h4>
                     <p>{content.connections} connections</p>
