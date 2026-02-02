@@ -1,19 +1,20 @@
-/* Header layout */
-.header{
+/* --- Base Styles (Mobile First or Tablet-ish) --- */
+
+.header {
   position: sticky;
   top: 10px;
   display: flex;
   align-items: center;
-  /* justify-content: space-between; */
+  justify-content: space-between; /* Changed from gap: 15% for better scaling */
   padding: 12px 16px;
   background: #ffffff;
   border: 1px solid #e9e9ef;
-  width: 80%;
-  gap: 15%;
+  width: 95%; /* Default for smaller screens */
+  margin: auto;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 999;
-  margin: auto;
+  margin: auto !important;
 }
 
 .headerLeft{
@@ -57,27 +58,28 @@
   width: 220px;
 }
 
-.headerRight{
-    display: flex;
-    gap: 30px;
+.headerRight {
+  display: flex;
+  gap: 20px; /* Reduced base gap */
 }
 
 .headerRightItem{
     display: flex;
     flex-direction: column;
     position: relative;
+    align-items: center;
 }
 
 .headerRightItem .icon{
     align-self: center;
     font-size: 1.7rem;
-    color: #555;
+    color: #374151;
     cursor: pointer;
 }
 
 .headerRightItem p{
     font-size: 12px;
-    color: #555;
+    color: #374151;
     text-align: center;
 }
 
@@ -126,9 +128,153 @@
   margin-top: 5px;
 }
 
-@media (max-width: 600px){
-  .searchInput{
-    width: 140px;
-    font-size: 13px;
+.profileItem {
+  position: relative;
+}
+
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.avatarFallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  user-select: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileLabel {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.hrDropDown {
+  list-style: none;
+  position: absolute;
+  top: 70px;
+  right: 0;
+  background: #ffffff;
+  width: 160px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(81, 67, 232, 0.12);
+  border-radius: 8px;
+  z-index: 1000;
+}
+
+.hrDropDown li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.hrDropDown li:hover {
+  background: #f3f4f8;
+}
+
+.hrDropDown li#settings svg {
+  font-size: 16px;
+  color: #757575;
+}
+
+.hrDropDown li.danger {
+  color: #f44336;
+}
+
+
+/* --- Responsive Breakpoints --- */
+
+/* 📱 Small Mobile (Phones) */
+@media (max-width: 600px) {
+  .header {
+    width: 100%;
+    top: 0;
+    border-radius: 0; /* Full width on tiny screens often looks better */
+    padding: 10px;
+  }
+
+  .searchInput {
+    width: 100px; /* Shrink search significantly */
+    font-size: 12px;
+  }
+
+  .headerRight {
+    gap: 15px;
+    align-items: center;
+  }
+
+  /* Hide labels on mobile to save space, show only icons */
+  .headerRightItem p {
+    display: none; 
+  }
+
+  .headerRightItem .icon {
+    font-size: 1.3rem;
+  }
+}
+
+/* 📱 Tablet / Large Mobile */
+@media (min-width: 601px) and (max-width: 1023px) {
+  .header {
+    width: 90%;
+  }
+
+  .searchInput {
+    width: 180px;
+  }
+
+  .headerRight {
+    gap: 25px;
+    align-items: center;
+  }
+}
+
+/* 💻 Laptop / Desktop (Your original design target) */
+@media (min-width: 1024px) {
+  .header {
+    width: 80%;
+  }
+  
+  .searchInput {
+    width: 220px;
+  }
+  
+  .headerRight {
+    gap: 30px;
+    align-items: center;
+  }
+}
+
+/* 🖥️ Ultra-wide */
+@media (min-width: 1536px) {
+  .header {
+    width: 70%; /* Keep the bar from getting too long on giant monitors */
+    max-width: 1400px;
+  }
+   .headerRight {
+    align-items: center;
   }
 }

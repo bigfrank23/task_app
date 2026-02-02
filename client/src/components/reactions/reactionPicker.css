@@ -1,0 +1,53 @@
+.reaction-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Like button */
+.reaction-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: #38434f;
+}
+
+/* Picker container */
+.reaction-picker {
+  position: absolute;
+  bottom: 140%;
+  left: 0;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 25px;
+  padding: 8px 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+
+  /* hidden by default */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(5px);
+  transition: all 0.2s ease;
+}
+
+/* SHOW picker when hovering wrapper */
+.reaction-wrapper:hover .reaction-picker {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Reaction icons */
+.reaction-icon {
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.reaction-icon:hover {
+  transform: scale(1.3);
+}

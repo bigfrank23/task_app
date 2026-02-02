@@ -17,6 +17,9 @@
   padding: 25px;
   border-radius: 16px;
 
+   max-height: 80vh;
+  overflow-y: auto;
+
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -26,7 +29,33 @@
 
   color: #fff;
   position: relative;
+  animation: modalIn 0.25s ease-out;
 }
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.glassModal::-webkit-scrollbar {
+  width: 6px;
+}
+.glassModal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.glassModal:focus {
+  outline: none;
+}
+
+
 
 /* Close button */
 .closeBtn {
@@ -38,4 +67,31 @@
   font-size: 22px;
   color: white;
   cursor: pointer;
+   width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: background 0.2s ease;
 }
+
+.closeBtn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+
+
+/* @media (prefers-color-scheme: dark) {
+  .glassModal {
+    background: rgba(20, 20, 20, 0.6);
+  }
+} */

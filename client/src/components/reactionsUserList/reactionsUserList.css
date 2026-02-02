@@ -1,0 +1,30 @@
+.reactUserList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.reactUserRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reactUserInfo {
+  flex: 1;
+}
+
+.reactUserInfo h4 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.jobTitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.bio {
+  font-size: 12px;
+  color: #9ca3af;
+}

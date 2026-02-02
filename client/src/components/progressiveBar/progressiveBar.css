@@ -4,13 +4,13 @@
     position: sticky;
     top: 90px;
     left: 0;
-    width: 80%;
+    width: 95%;
     height: 6px;
     background-color: #e6e6e8;
-    z-index: 1;
+    z-index: 1234;
     border-radius: 999px;
     overflow: hidden;
-    margin: auto;
+    margin: auto !important;
 }
 
 .progress-bar {
@@ -42,8 +42,36 @@
   100% { left: 120%; }
 }
 
-/* Make it smaller on narrow screens */
-@media (max-width: 600px){
-  .progress-container{ height: 4px; }
+/* --- Responsive Breakpoints --- */
+
+/* 📱 Small Mobile (Phones) */
+@media (max-width: 600px) {
+  .progress-container{ 
+    height: 4px; 
+    width: 100%;
+    top: 77px;
+  }
+}
+
+/* 📱 Tablet / Large Mobile */
+@media (min-width: 601px) and (max-width: 1023px) {
+  .progress-container{
+    width: 90%;
+  }
+}
+
+/* 💻 Laptop / Desktop (Your original design target) */
+@media (min-width: 1024px) {
+  .progress-container{
+    width: 80%;
+  }
+}
+
+/* 🖥️ Ultra-wide */
+@media (min-width: 1536px) {
+  .progress-container{
+    width: 70%; /* Keep the bar from getting too long on giant monitors */
+    max-width: 1400px;
+  }
 }
 

@@ -1,85 +1,149 @@
 import './sideBar.css'
-import EditIcon from '@mui/icons-material/Edit';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
 import PeopleIcon from '@mui/icons-material/People';
 import CircleIcon from '@mui/icons-material/Circle';
 import ChatIcon from '@mui/icons-material/Chat';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import useAuthStore from '../../utils/authStore';
+import { Link } from 'react-router-dom';
+import { EditIcon } from '../../utils/svgIcons';
+import useOnlineUsersStore from '../../utils/onlineUsersStore';
+import { useFollowers } from '../../utils/useSocialFeatures';
+import { formatTime } from '../../utils/time';
 
-const SideBar = () => {
+const SideBar = ({showEditProfile, showBottomAnalytics}) => {
+  const {user} = useAuthStore()
+  const { onlineUsers } = useOnlineUsersStore(); // ✅ Access online users
+  const { data: followersData } = useFollowers(user?._id);
+  
+
+  const followers = followersData?.followers || [];
+
+  const initials = `${user?.firstName?.charAt(0) ?? ""}${
+    user?.lastName?.charAt(0) ?? ""
+  }`.toUpperCase()
   return (
     <div className='sideBar'>
       <div className="sbTop">
-        <img src="/general/images/wp.jpg" alt="" className="sbCoverImg" />
-        <div className="sbProfile">
-          <img src="/general/images/franklin.jpg" alt="" className="sbProfileImg" />
-        </div>
-        <h3 className="sbUsername">John Franklin</h3>
-        <p className="sbUserTitle">Full Stack Developer</p>
-        <p className="sbUserBio">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Corrupti deleniti a non error vero perspiciatis quisquam. Ea dolore deserunt magnam?</p>
+        {user?.coverPhoto ? (
+          <img 
+            src={user.coverPhoto} 
+            alt="Cover" 
+            className="sbCoverImg" 
+            loading='lazy'
+            onError={(e)=> {e.target.src = '/general/images/placeholder.jpg'; e.target.alt = 'Image fail to load'}}
+          />
+        ) : (
+          <div
+            className="sbCoverDiv"
+            style={{
+              backgroundImage: user?.coverImg
+                ? `url(${user.coverImg})`
+                : `linear-gradient(135deg, #667eea, #764ba2)`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              width: "100%",
+              height: "120px",
+              borderTopLeftRadius: "10px",
+              borderTopRightRadius: "10px",
+              position: "relative",
+            }}
+          />
+        )}
+        
+        <Link to={`/profile/${user?._id}`} className="sbProfile">
+          {user?.userImage ? (
+            <img
+              src={user.userImage}
+              alt="user_profile_img"
+              className="sbProfileImg"
+              onError={(e)=> {e.target.src = '/general/images/user.png'; e.target.alt = 'Image fail to load'}}
+              loading="lazy"
+            />
+          ) : (
+            <span className="sbAvatarFallback">
+              {initials}
+            </span>
+          )}
+        </Link>
+        
+        <h3 className="sbUsername">{user?.firstName} {user?.lastName}</h3>
+        <p className="sbUserTitle">{user?.jobTitle}</p>
+        <p className="sbUserBio">{user?.bio}</p>
+        
         <div className="sbLocation">
           <LocationPinIcon className='sbLocationIcon'/>
-          <span>New York, USA</span>
+          <span>{user?.location}</span>
         </div>
-        <div style={{display: "flex", justifyContent: "center", padding: "10px"}}>
-          <button className="editButton">
-            <span className="editText">Edit Profile</span>
-            <EditIcon className='editIcon'/>
-          </button>
-        </div>
+        
+        {showEditProfile && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "10px" }}>
+            <Link to="/profile/edit">
+              <button className="editButton">
+                <span className="editText">Edit Profile</span>
+                <EditIcon className="editIcon" />
+              </button>
+            </Link>
+          </div>
+        )}
       </div>
       <div className="sbMiddle1">
         <div className="sbItems">
           <div className='sbItem'>
             <PeopleIcon className='sbItemIcon'/>  
-            <h4 className="sbTitle">Connections</h4>
+            <h4 className="sbTitle">Followers</h4>
           </div>
-          <span className="sbCount">150</span>
+          <span className="sbCount">{followers.length}</span>
         </div>
-        <div className="sbConnections">
-          <img className='sbConnectionImg' src="/general/images/cartoonDP3.jpg" alt="" />
-          <CircleIcon className='sbConnectionStatus'/>
-          <div className="sbConnection">
-            <h4 className='sbConnectionName'>Sarah Lee</h4>
-            <p className="sbConnectionBio">Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus, alias.</p>
-            <span>online</span>
+        {/* ✅ Map through actual followers with online status */}
+        {followers.slice(0, 4).map(follower => (
+          <div key={follower._id} className="sbConnections">
+            {
+              follower?.userImage ? (
+                <Link to={`/profile/${follower?._id}`}>
+                  <img 
+                    className='sbConnectionImg' 
+                    src={follower.userImage} 
+                    alt={follower.displayName} 
+                    onError={(e)=> {e.target.src = '/general/images/user.png'; e.target.alt = 'Image fail to load'}}
+                    loading="lazy"
+                  />
+                </Link>
+              ) : (
+                <Link to={`/profile/${follower?._id}`}>
+                  <span className="sbFollowImgFallback">{
+                    `${follower?.firstName?.charAt(0) ?? ""}${
+                    follower?.lastName?.charAt(0) ?? ""
+                  }`.toUpperCase()
+                  }</span>
+                </Link>
+              )
+            }
+            <CircleIcon 
+              className={`sbConnectionStatus ${onlineUsers[follower._id] ? '' : 'offline'}`}
+              style={{ 
+                color: onlineUsers[follower._id] ? '#10b981' : '#6b7280' 
+              }}
+            />
+            <div className="sbConnection">
+              <h4 className='sbConnectionName'>{follower.displayName}</h4>
+              <p className="sbConnectionBio">
+                {follower.jobTitle?.slice(0, 50) || ''}
+              </p>
+              <span>
+                {onlineUsers[follower._id] ? 'online' : `offline${follower.lastSeen ? ` ${formatTime(follower.lastSeen)}` : ''}`}
+              </span>
+            </div>
+            <ChatIcon className='sbConnectionChatIcon'/>
           </div>
-          <ChatIcon className='sbConnectionChatIcon'/>
-        </div>
-        <div className="sbConnections">
-          <img className='sbConnectionImg' src="/general/images/cartoonDP.jpg" alt="" />
-          <CircleIcon className='sbConnectionStatus'/>
-          <div className="sbConnection">
-            <h4 className='sbConnectionName'>Markus Bush</h4>
-            <p className="sbConnectionBio">Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus, alias.</p>
-            <span>online</span>
+        ))}
+       {followers.length > 4 && (
+          <div className="sbConnectionViewAll">
+            <span>View All</span>
           </div>
-          <ChatIcon className='sbConnectionChatIcon'/>
-        </div>
-        <div className="sbConnections">
-          <img className='sbConnectionImg' src="/general/images/cartoonDP2.jpg" alt="" />
-          <CircleIcon className='sbConnectionStatus offline'/>
-          <div className="sbConnection">
-            <h4 className='sbConnectionName'>Peter Adams</h4>
-            <p className="sbConnectionBio">Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus, alias.</p>
-            <span>offline 2mins ago</span>
-          </div>
-          <ChatIcon className='sbConnectionChatIcon'/>
-        </div>
-        <div className="sbConnections last">
-          <img className='sbConnectionImg' src="/general/images/user.jpg" alt="" />
-          <CircleIcon className='sbConnectionStatus'/>
-          <div className="sbConnection">
-            <h4 className='sbConnectionName'>John Doe</h4>
-            <p className="sbConnectionBio">Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus, alias.</p>
-            <span>online</span>
-          </div>
-          <ChatIcon className='sbConnectionChatIcon'/>
-        </div>
-        <div className="sbConnectionViewAll">
-          <span>View All</span>
-        </div>
+        )}
       </div>
+      {showBottomAnalytics && (
       <div className="sbBottom">
         <div className="sbBottomTittle">
           <BarChartIcon/>
@@ -133,6 +197,7 @@ const SideBar = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }

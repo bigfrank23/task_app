@@ -4,7 +4,7 @@
   -webkit-box-orient: vertical;
   /* Use the CSS variable to set the line limit dynamically */
   -webkit-line-clamp: var(--limit, 3); /* Default to 3 lines if variable not set */
-  max-height: calc(var(--limit, 3) * 1.2em); /* Adjust 1.2em based on your line-height */
+  /* max-height: calc(var(--limit, 3) * 1.2em); Adjust 1.2em based on your line-height */
 }
 
 .read-more-button {

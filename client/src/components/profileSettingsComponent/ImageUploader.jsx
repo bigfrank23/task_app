@@ -18,7 +18,7 @@ const ImageUploader = ({
   maxSizeMB = 5,
 }) => {
   const inputRef = useRef(null);
-  const { updateUser } = useAuthStore();
+  const { updateUser} = useAuthStore();
   const uploadMutation = useImageUpload();
 
   const [preview, setPreview] = useState(null);
@@ -85,9 +85,11 @@ const ImageUploader = ({
       },
       {
         onSuccess: (data) => {
-          updateUser(data.user); // Zustand sync
+          // Fix: Update with the correct field name
+          const updateField = fieldName === 'avatar' ? 'userImage' : 'coverPhoto';
+          updateUser({ [updateField]: data.url });
           setSuccess("Upload successful!");
-          showSuccess("Upload successful!")
+          showSuccess(data?.message)
           setProgress(100);
         },
         onError: (err) => {
@@ -97,6 +99,7 @@ const ImageUploader = ({
         },
       }
     );
+    
   };
 
   return (
@@ -131,12 +134,21 @@ const ImageUploader = ({
         {fileName && <div className="file-name">{fileName}</div>}
       </div>
 
-      <button onClick={handleUpload} disabled={!file || uploadMutation.isLoading}>
-        {uploadMutation.isLoading ? "Uploading..." : uploadLabel}
+      <button onClick={handleUpload} disabled={!file || uploadMutation.isPending}>
+        {uploadMutation.isPending ? "Uploading..." : uploadLabel}
       </button>
 
-      {uploadMutation.isLoading && progress > 0 && (
-        <ProgressRing progress={progress} />
+      {uploadMutation.isPending && progress > 0 && (
+        // <ProgressRing progress={progress} />
+        <div style={{ marginTop: "10px", width: "100%", height: "8px", backgroundColor: "#e5e7eb", borderRadius: "4px" }}>
+        <div style={{
+          width: `${progress}%`,
+          height: "100%",
+          backgroundColor: "#2563eb",
+          borderRadius: "4px",
+          transition: "width 0.2s ease"
+        }} />
+      </div>
       )}
 
       {showCrop && (

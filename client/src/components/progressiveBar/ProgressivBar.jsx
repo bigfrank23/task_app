@@ -23,7 +23,7 @@ const ProgressiveBar = () => {
   }, [calculateScrollDistance]);
 
   return (
-    <div className="progress-container">
+    <div className="progress-container" id='progressBox'>
       {/* The progress bar whose width changes with scroll position */}
       <div
         className="progress-bar"

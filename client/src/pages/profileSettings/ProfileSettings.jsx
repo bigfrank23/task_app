@@ -7,29 +7,66 @@ import './profileSettings.css'
 import Header from '../../components/header/Header'
 import PublicIcon from '@mui/icons-material/Public';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
+import useAuthStore from "../../utils/authStore";
 
 const ProfileSettings = () => {
+    const {user} = useAuthStore()
+
+    const initials = `${user?.firstName?.charAt(0) ?? ""}${
+    user?.lastName?.charAt(0) ?? ""
+  }`.toUpperCase()
  return (
   <div>
       <Header/>
       <div className="profileSettings">
         <div className="profileSettingsLeft">
           <div className="profileSettingsLTop">
-            <img src="/general/images/wp.jpg" alt="" className="profileSettingsLbCoverImg" />
+            {
+            user?.coverPhoto ?
+            <img src={user?.coverPhoto} alt="" className="bgCImg" />
+            :
+            <div
+              className="bgCDiv"
+              style={{
+                backgroundImage: user?.coverImg
+                  ? `url(${user.coverImg})`
+                  : `linear-gradient(135deg, #667eea, #764ba2)`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                width: "100%",
+                height: "100px",
+                borderTopLeftRadius: "16px",
+                borderTopRightRadius: "16px",
+                position: "relative",
+              }}
+            />
+          }
             <div className="profileSettingsLProfile">
-              <img src="/general/images/franklin.jpg" alt="" className="profileSettingsLProfileImg" />
+              {user?.userImage ? (
+              <img
+                src={user.userImage}
+                alt="user_profile_img"
+                className="profileSettingsLProfileImg"
+              />
+            ) : (
+              <span className="pfSAvatarFallback"
+              >
+                {initials}
+              </span>
+            )}
             </div>
-            <h3 className="profileSettingsLUsername">John Franklin</h3>
-            <p className="profileSettingsLUserTitle">Full Stack Developer</p>
-            <p className="profileSettingsUserBio">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Corrupti deleniti a non error vero perspiciatis quisquam. Ea dolore deserunt magnam?</p>
+            <h3 className="profileSettingsLUsername">{user?.firstName} {user?.lastName}</h3>
+            <span className="profileSettingsHandle">@{user?.displayName}</span>
+            <p className="profileSettingsLUserTitle">{user?.jobitle}</p>
+            <p className="profileSettingsUserBio">{user?.bio}</p>
             <div className="profileSettingsLocation">
               <LocationPinIcon className='profileSettingsLocationIcon'/>
-              <span>New York, USA</span>
+              <span>{user?.location}</span>
             </div>
           </div>
         </div>
         <div className="profile-settings">
-          <h1 className="profile-settings-title">Profile Settings</h1>
+          <h1 className="profile-settings-title">Edit Profile</h1>
 
           <ProfileInfoForm />
           <AvatarUpload />

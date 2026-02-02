@@ -377,3 +377,398 @@
   background-color: #a1a1a1;
   cursor: not-allowed;
 }
+
+.title-quill .ql-container {
+  font-size: 1rem !important;  /* Match your form inputs */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.title-quill .ql-toolbar {
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
+  border-top: none !important;
+  padding: 8px 12px !important;
+  height: 42px !important;
+}
+
+.title-quill .ql-toolbar .ql-formats {
+  margin-right: 0;
+}
+
+
+/* --- Responsive Breakpoints --- */
+
+/* 📱 Small Mobile (Phones) */
+/* --- Responsive Breakpoints --- */
+
+/* 📱 Small Mobile (Phones) */
+@media (max-width: 600px) {
+  .dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .container {
+    width: 100%;
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  /* Welcome Message */
+  .welcomeMessage {
+    font-size: 1.2rem;
+    padding: 10px 0;
+    text-align: center;
+  }
+
+  /* Content Box */
+  .contentBox {
+    width: 100%;
+    padding: 10px;
+    margin: 0;
+  }
+
+  /* Header Row - Stack vertically on mobile */
+  #contentBoxHeader {
+    display: none; /* Hide table headers on mobile */
+  }
+
+  /* Task Rows - Card Layout */
+  .containerTaskRow {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Task Items */
+  .containerTaskItems {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .customCheckbox {
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .taskContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .taskContent img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  .taskImg,
+  .blurImg {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .blurImg {
+    filter: blur(2px);
+    opacity: 0.6;
+  }
+
+  /* Status, Deadline, Action in mobile view */
+  .containerStatusItem,
+  .containerDeadlineItem,
+  .containerActionItem {
+    width: 100%;
+    padding: 8px 0;
+  }
+
+  .containerStatusItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .containerStatusItem::before {
+    content: 'Status: ';
+    font-weight: 600;
+    color: #666;
+  }
+
+  .containerDeadlineItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+  }
+
+  .containerDeadlineItem::before {
+    content: 'Deadline: ';
+    font-weight: 600;
+    color: #666;
+  }
+
+  .containerActionItem {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .editButton,
+  .editButtonHidden,
+  .deleteButton {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  /* Status badges */
+  .statusCompleted,
+  .statusOverdue,
+  .statusPending {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  /* Add New Task Section */
+  .addNewTask {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .addNewTaskIcons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .addNewTaskContent {
+    width: 100%;
+  }
+
+  .addNewTaskContent > p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  /* Text Area */
+  .textArea {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .textArea > div {
+    width: 100% !important;
+  }
+
+  #newTask {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    resize: vertical;
+  }
+
+  /* Emoji Picker */
+  .emojiPickerButton {
+    padding: 8px 16px;
+    font-size: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  /* Add Button */
+  .addButton,
+  .addQuillButton {
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: auto;
+  }
+
+  .hideAddButton {
+    display: none;
+  }
+
+  /* React Quill Editor */
+  .ql-container {
+    font-size: 14px;
+    min-height: 150px;
+  }
+
+  .ql-editor {
+    min-height: 150px;
+  }
+
+  .addQuill {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Completed task styling */
+  .completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  /* Sidebar adjustments */
+  .sideBar {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+
+  /* Header adjustments */
+  .header {
+    width: 100%;
+    padding: 15px 10px;
+  }
+}
+
+/* 📱 Tablet / Large Mobile */
+@media (min-width: 601px) and (max-width: 1023px) {
+  .dashboard {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .container {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .contentBox {
+    padding: 20px;
+  }
+
+  /* Show headers but make them smaller */
+  #contentBoxHeader {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 15px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  #contentBoxHeader h3 {
+    font-size: 14px;
+  }
+
+  /* Task Rows */
+  .containerTaskRow {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+  }
+
+  .containerTaskItems,
+  .containerStatusItem,
+  .containerDeadlineItem,
+  .containerActionItem {
+    width: 100%;
+  }
+
+  /* Remove the ::before labels on tablet */
+  .containerStatusItem::before,
+  .containerDeadlineItem::before {
+    display: none;
+  }
+
+  .containerActionItem {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .editButton,
+  .editButtonHidden,
+  .deleteButton {
+    padding: 6px 10px;
+    font-size: 13px;
+    flex: 1;
+    min-width: 80px;
+  }
+
+  /* Add New Task */
+  .addNewTask {
+    margin-top: 20px;
+  }
+
+  .textArea textarea {
+    min-height: 100px;
+  }
+
+  .ql-container {
+    min-height: 120px;
+  }
+
+  /* Sidebar */
+  .sideBar {
+    width: 200px;
+  }
+}
+
+/* Landscape Phone Orientation */
+@media (max-width: 900px) and (orientation: landscape) {
+  .containerTaskRow {
+    padding: 10px;
+  }
+
+  #newTask {
+    min-height: 80px;
+  }
+
+  .ql-editor {
+    min-height: 100px;
+  }
+}
+@media (max-width: 480px) {
+  .emoji-picker {
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+}

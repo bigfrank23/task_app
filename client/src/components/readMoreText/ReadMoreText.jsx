@@ -19,14 +19,14 @@ const ReadMoreText = ({ children, limit, className = '' }) => {
 
   return (
     <div>
-      <p
+      <div
         ref={ref}
         // Apply 'truncate-text' class only if not expanded, plus any additional classes
         className={`${!isExpanded ? 'truncate-text' : ''} ${className}`.trim()}
         style={{ '--limit': limit }} // Pass the line limit as a CSS variable
       >
         {children}
-      </p>
+      </div>
       {/* Show button only if text is actually truncated */}
       {isTruncated && (
         <button onClick={toggleExpanded} className="read-more-button">

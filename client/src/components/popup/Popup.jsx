@@ -5,13 +5,15 @@ const Popup = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
   return (
-      <div
-        className="popup-container"
-        // onClick={(e) => e.stopPropagation()}
-      >
-        <div className="popup-close" onClick={onClose}>
-          <CloseIcon style={{fontSize: "13px"}}/>
-        </div>
+    <>
+      {/* Backdrop */}
+      <div className="popup-backdrop" onClick={onClose} />
+      
+      {/* Modal */}
+      <div className="popup-container">
+        <button className="popup-close" onClick={onClose}>
+          <CloseIcon style={{ fontSize: "16px" }} />
+        </button>
 
         {title && <h2 className="popup-title">{title}</h2>}
 
@@ -19,7 +21,9 @@ const Popup = ({ isOpen, onClose, title, children }) => {
           {children}
         </div>
       </div>
+    </>
   );
 };
+
 
 export default Popup;

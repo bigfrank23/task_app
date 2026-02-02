@@ -13,6 +13,7 @@ const ProfileInfoForm = () => {
     firstName: user?.firstName || user?.user?.firstName || "",
     lastName: user?.lastName || user?.user?.lastName || "",
     jobTitle: user?.jobTitle || user?.user?.jobTitle || "",
+    location: user?.location || user?.user?.location || "",
     email: user?.email || "",
     bio: user?.bio || user?.user?.bio || "",
   });
@@ -38,7 +39,7 @@ const ProfileInfoForm = () => {
     });
   };
 
-  console.log(user.authProvider);
+  // console.log(user.authProvider);
   
 
 
@@ -49,32 +50,36 @@ const ProfileInfoForm = () => {
       <form onSubmit={handleSubmit} className="profile-form">
         <div className="form-group">
           <label>Display Name</label>
-          <input name="displayName" value={formData.displayName} onChange={handleChange} />
+          <input name="displayName" value={formData?.displayName} onChange={handleChange} />
         </div>
         {
           (user?.user?.authProvider || user?.authProvider) === "local" &&
         <div className="form-group">
           <label>First Name</label>
-          <input name="firstName" value={formData.firstName} onChange={handleChange} />
+          <input name="firstName" value={formData?.firstName} onChange={handleChange} />
         </div>
         }
         {
-          (user.user?.authProvider || user?.authProvider) === "local" &&
+          (user?.user?.authProvider || user?.authProvider) === "local" &&
           <div className="form-group">
             <label>Last Name</label>
-            <input name="lastName" value={formData.lastName} onChange={handleChange} />
+            <input name="lastName" value={formData?.lastName} onChange={handleChange} />
           </div>
         }
         <div className="form-group">
           <label>Job Title</label>
-          <input name="jobTitle" value={formData.jobTitle} onChange={handleChange} />
+          <input name="jobTitle" value={formData?.jobTitle} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label>Location</label>
+          <input name="location" value={formData?.location} onChange={handleChange} />
         </div>
 
         {
-          (user.user?.authProvider || user?.authProvider) === "local" &&
+          (user?.user?.authProvider || user?.authProvider) === "local" &&
         <div className="form-group">
           <label>Email</label>
-          <input name="email" value={formData.email} onChange={handleChange} />
+          <input name="email" value={formData?.email} onChange={handleChange} />
         </div>
         }
 
@@ -84,7 +89,7 @@ const ProfileInfoForm = () => {
             id="bio"
             name="bio"
             rows="3"
-            value={formData.bio}
+            value={formData?.bio}
             onChange={handleChange}
           />
         </div>

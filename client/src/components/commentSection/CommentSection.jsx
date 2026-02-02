@@ -1,217 +1,320 @@
-import './commentSection.css'
-import { useState } from 'react'
+// components/commentSection/CommentSection.jsx
+import './commentSection.css';
+import { useRef, useState } from 'react';
+import { 
+  useAddComment, 
+  useAddReply, 
+  useComments, 
+  useDeleteComment,
+  useDeleteReply,
+  useToggleReplyReaction
+} from '../../utils/useSocialInteractions';
+import useAuthStore from '../../utils/authStore';
+import { formatRelativeTime } from '../../utils/time';
+import DOMPurify from 'dompurify';
+import RichTextComment from './RichTextComment';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Avatar from '../avatar/Avatar';
+import useOnlineUsersStore from '../../utils/onlineUsersStore';
+import { LoadingSpinner } from '../tasks/TaskUtils';
+import ReactionPicker from '../reactions/ReactionPicker';
+import Pagination from '../../pages/Dashboard/pagination/Paginaton';
 
-const sample = [
-  {
-    id: 1,
-    author: 'Jane Cooper',
-    avatar: 'JC',
-    text: 'Great post! Very insightful — thanks for sharing.',
-    time: Date.now() - 1000 * 60 * 5,
-    likes: 2,
-    liked: false,
-    replies: [
-      { id: 11, author: 'Albert Flores', avatar: 'AF', text: 'Agreed!', time: Date.now() - 1000 * 60 * 2 },
-    ],
-  },
-  {
-    id: 2,
-    author: 'Cody Fisher',
-    avatar: 'CF',
-    text: "I found this helpful — especially the examples.",
-    time: Date.now() - 1000 * 60 * 60,
-    likes: 0,
-    liked: false,
-    replies: [],
-  },
-]
+const CommentSection = ({ taskId }) => {
+  const { user } = useAuthStore();
+  const [currentPage, setCurrentPage] = useState(1); // ✅ Add this state
 
-const timeAgo = (ts) => {
-  const s = Math.floor((Date.now() - ts) / 1000)
-  if (s < 60) return 'Just now'
-  const m = Math.floor(s / 60)
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h`
-  const d = Math.floor(h / 24)
-  return `${d}d`
-}
+  const commentSectionRef = useRef(null);
+  
+  // ✅ Only use this one - remove the duplicate
+  const { data: commentsData, isPending } = useComments(taskId, currentPage, 10);
+  
+  const addCommentMutation = useAddComment();
+  const addReplyMutation = useAddReply();
+  const deleteCommentMutation = useDeleteComment();
+  const deleteReplyMutation = useDeleteReply();
+  const toggleReplyReaction = useToggleReplyReaction();
 
-const EMOJIS = ['👍','❤️','😂','🎉','👏','😮','😢','🔥','💯','🙌','🤔','😄']
+  const { onlineUsers } = useOnlineUsersStore();
+  const [replyMap, setReplyMap] = useState({});
 
-const CommentSection = () => {
-  const [comments, setComments] = useState(sample)
-  const [text, setText] = useState('')
-  const [replyMap, setReplyMap] = useState({})
-  const [showEmoji, setShowEmoji] = useState(false)
-  const [image, setImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
+  // ✅ Extract comments and pagination from response
+  const comments = commentsData?.data || [];
+  const pagination = commentsData?.pagination || {};
 
-  const addComment = () => {
-    const t = text.trim()
-    if (!t && !image) return
-    const newItem = { id: Date.now(), author: 'You', avatar: 'Y', text: t, image: imagePreview || null, time: Date.now(), likes: 0, liked: false, replies: [] }
-    setComments(prev => [newItem, ...prev])
-    setText('')
-    setImage(null)
-    setImagePreview(null)
-    setShowEmoji(false)
-  }
+  const addComment = (text, attachments) => {
+    addCommentMutation.mutate(
+      { taskId, text, attachments },
+      {
+        onSuccess: () => {
+          setCurrentPage(1); // Reset to first page after adding comment
+        }
+      }
+    );
+  };
 
-  const toggleLike = (id) => {
-    setComments(prev => prev.map(c => c.id === id ? { ...c, liked: !c.liked, likes: c.liked ? c.likes - 1 : c.likes + 1 } : c))
-  }
+const handlePageChange = (page) => {
+  setCurrentPage(page);
+
+  requestAnimationFrame(() => {
+    commentSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  });
+};
+
+
+  const handleDeleteComment = (commentId) => {
+    if (window.confirm('Delete this comment?')) {
+      deleteCommentMutation.mutate({ taskId, commentId });
+    }
+  };
+
+  const handleDeleteReply = (commentId, replyId) => {
+    if (window.confirm('Delete this reply?')) {
+      deleteReplyMutation.mutate({ taskId, commentId, replyId });
+    }
+  };
 
   const toggleReplyInput = (id) => {
-    setReplyMap(prev => ({ ...prev, [id]: !prev[id] }))
-  }
+    setReplyMap(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
-  const addReply = (id, replyText, replyImagePreview = null) => {
-    const t = replyText.trim()
-    if (!t && !replyImagePreview) return
-    setComments(prev => prev.map(c => c.id === id ? { ...c, replies: [...c.replies, { id: Date.now(), author: 'You', avatar: 'Y', text: t, image: replyImagePreview, time: Date.now() }] } : c))
-    setReplyMap(prev => ({ ...prev, [id]: false }))
+  const addReply = (commentId, replyText, replyAttachments = []) => {
+    const t = replyText?.trim();
+    if (!t && !replyAttachments?.length) return;
+
+    addReplyMutation.mutate(
+      { taskId, commentId, text: t, attachments: replyAttachments },
+      {
+        onSuccess: () => {
+          setReplyMap(prev => ({ ...prev, [commentId]: false }));
+        }
+      }
+    );
+  };
+
+  const getUserReplyReaction = (reply) => {
+    if (reply.reactions?.like?.includes(user._id)) return 'like';
+    if (reply.reactions?.love?.includes(user._id)) return 'love';
+    if (reply.reactions?.celebrate?.includes(user._id)) return 'celebrate';
+    if (reply.reactions?.dislike?.includes(user._id)) return 'dislike';
+    return null;
+  };
+
+  const replyReactionCounts = (reply) => ({
+    like: reply.reactions?.like?.length || 0,
+    love: reply.reactions?.love?.length || 0,
+    celebrate: reply.reactions?.celebrate?.length || 0,
+    dislike: reply.reactions?.dislike?.length || 0,
+  });
+
+  if (isPending) {
+    return (
+      <div className="cs-root" ref={commentSectionRef}>
+        <LoadingSpinner size='20' message='Loading comments...'/>
+      </div>
+    );
   }
 
   return (
     <div className="cs-root">
-      <div className="cs-new">
-        <div className="cs-avatar">Y</div>
-        <div className="cs-input">
-          <textarea
-            placeholder="Add a comment..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={2}
-          />
-          <div className="cs-tools">
-            <div className="cs-left-tools">
-              <button className="cs-tool" type="button" onClick={() => setShowEmoji(s => !s)} aria-label="emoji">😊</button>
-              <label className="cs-tool cs-photo">
-                📷
-                <input type="file" accept="image/*" style={{display:'none'}} onChange={(e)=>{
-                  const f = e.target.files && e.target.files[0]
-                  if (f){
-                    setImage(f)
-                    const url = URL.createObjectURL(f)
-                    setImagePreview(url)
-                  }
-                  e.target.value = null
-                }} />
-              </label>
-            </div>
-            <div className="cs-right-tools">
-              <button className="cs-btn" disabled={text.trim() === '' && !imagePreview} onClick={addComment}>Comment</button>
-            </div>
-          </div>
-
-          {showEmoji && (
-            <div className="cs-emoji-picker">
-              {EMOJIS.map(e => (
-                <button key={e} type="button" className="cs-emoji" onClick={()=> setText(prev => (prev + e))}>{e}</button>
-              ))}
-            </div>
-          )}
-
-          {imagePreview && (
-            <div className="cs-img-preview">
-              <img src={imagePreview} alt="preview" />
-              <button type="button" className="cs-remove-img" onClick={()=>{ URL.revokeObjectURL(imagePreview); setImage(null); setImagePreview(null); }}>✕</button>
-            </div>
-          )}
-        </div>
-      </div>
+      <RichTextComment onSubmit={addComment} />
 
       <div className="cs-list">
-        {comments.map(c => (
-          <div className="cs-item" key={c.id}>
-            <div className="cs-left">
-              <div className="cs-avatar">{c.avatar}</div>
-            </div>
-            <div className="cs-right">
-              <div className="cs-header">
-                <span className="cs-author">{c.author}</span>
-                <span className="cs-time">{timeAgo(c.time)}</span>
+        {comments.map(c => {
+          return (
+            <div className="cs-item" key={c._id}>
+              <div className="cs-left">
+                <div className="cs-avatar">
+                  <Avatar 
+                    image={c?.author?.userImage} 
+                    name={c?.author?.displayName} 
+                    isOnline={onlineUsers[c?.author?._id]}
+                  />
+                </div>
               </div>
-              <div className="cs-text">{c.text}</div>
-              <div className="cs-actions-row">
-                <button className={`cs-action ${c.liked ? 'active' : ''}`} onClick={() => toggleLike(c.id)}>
-                  Like {c.likes ? <span className="cs-count">{c.likes}</span> : null}
-                </button>
-                <button className="cs-action" onClick={() => toggleReplyInput(c.id)}>Reply</button>
-              </div>
+              
+              <div className="cs-right">
+                <div className="cs-header">
+                  <span className="cs-author">{c.author?.displayName}</span>
+                  <span className="cs-time">{formatRelativeTime(c.createdAt)}</span>
+                  {c.author?._id === user?._id && !c.deleted && (
+                    <DeleteIcon
+                      onClick={() => handleDeleteComment(c._id)}
+                      style={{
+                        fontSize: 16,
+                        cursor: 'pointer',
+                        color: '#ef4444',
+                        marginLeft: 'auto'
+                      }}
+                    />
+                  )}
+                </div>
 
-              {replyMap[c.id] && (
-                <ReplyBox onAdd={(t, imgPreview) => addReply(c.id, t, imgPreview)} />
-              )}
+                {c.deleted ? (
+                  <i style={{ color: '#6b7280' }}>Comment deleted</i>
+                ) : (
+                  <>
+                    <div
+                      className="cs-text"
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(c.text || '') }}
+                    />
 
-              {c.replies && c.replies.length > 0 && (
-                <div className="cs-replies">
-                  {c.replies.map(r => (
-                    <div className="cs-reply" key={r.id}>
-                      <div className="cs-avatar small">{r.avatar}</div>
-                      <div>
-                        <div className="cs-header">
-                          <span className="cs-author">{r.author}</span>
-                          <span className="cs-time">{timeAgo(r.time)}</span>
-                        </div>
-                        <div className="cs-text">{r.text}</div>
-                        {r.image && <div className="cs-reply-img"><img src={r.image} alt="reply-img"/></div>}
+                    {c.attachments?.length > 0 && (
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px' }}>
+                        {c.attachments.map((att, idx) => (
+                          <div key={idx}>
+                            {att.type === 'image' && (
+                              <img src={att.url} alt={att.filename} style={{ maxWidth: 200, borderRadius: 8 }} />
+                            )}
+                            {att.type === 'video' && (
+                              <video src={att.url} controls style={{ maxWidth: 200, borderRadius: 8 }} />
+                            )}
+                            {att.type === 'file' && (
+                              <a href={att.url} target="_blank" rel="noopener noreferrer">
+                                📄 {att.filename}
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="cs-actions-row">
+                      <div className="cs-action" onClick={() => toggleReplyInput(c._id)}>
+                        Reply
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+                  </>
+                )}
 
-const ReplyBox = ({ onAdd }) => {
-  const [val, setVal] = useState('')
-  const [showEmoji, setShowEmoji] = useState(false)
-  const [img, setImg] = useState(null)
-  const [imgPreview, setImgPreview] = useState(null)
+                {replyMap[c._id] && (
+                  <ReplyBox 
+                    commentId={c._id}
+                    onAdd={addReply}
+                  />
+                )}
+
+                {c.replies && c.replies.length > 0 && (
+                  <div className="cs-replies">
+                    {c.replies.map(r => (
+                      <div className="cs-reply" key={r._id}>
+                        <div className="cs-avatar small">
+                          <Avatar 
+                            image={r?.author?.userImage} 
+                            name={r?.author?.displayName} 
+                            isOnline={onlineUsers[r?.author?._id]}
+                          />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div className="cs-header">
+                            <span className="cs-author">{r.author?.displayName}</span>
+                            <span className="cs-time">{formatRelativeTime(r.createdAt)}</span>
+                            {r.author?._id === user?._id && !r.deleted && (
+                              <DeleteIcon
+                                onClick={() => handleDeleteReply(c._id, r._id)}
+                                style={{
+                                  fontSize: 14,
+                                  cursor: 'pointer',
+                                  color: '#ef4444',
+                                  marginLeft: 'auto'
+                                }}
+                              />
+                            )}
+                          </div>
+
+                          {r.deleted ? (
+                            <i style={{ color: '#6b7280', fontSize: '13px' }}>Reply deleted</i>
+                          ) : (
+                            <>
+                              <div 
+                                className="cs-text"
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(r.text || '') }}
+                              />
+                              
+                              {r.attachments?.length > 0 && (
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '5px' }}>
+                                  {r.attachments.map((att, idx) => (
+                                    <div key={idx}>
+                                      {att.type === 'image' && (
+                                        <img src={att.url} alt={att.filename} style={{ maxWidth: 150, borderRadius: 8 }} />
+                                      )}
+                                      {att.type === 'video' && (
+                                        <video src={att.url} controls style={{ maxWidth: 150, borderRadius: 8 }} />
+                                      )}
+                                      {att.type === 'file' && (
+                                        <a href={att.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px' }}>
+                                          📄 {att.filename}
+                                        </a>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              <div className="cs-reply-actions">
+                                <ReactionPicker
+                                  currentReaction={getUserReplyReaction(r)}
+                                  onSelect={(type) =>
+                                    toggleReplyReaction.mutate({
+                                      taskId,
+                                      commentId: c._id,
+                                      replyId: r._id,
+                                      reactionType: type
+                                    })
+                                  }
+                                />
+
+                                {(() => {
+                                  const counts = replyReactionCounts(r);
+                                  const total = counts.like + counts.love + counts.celebrate + counts.dislike;
+                                  return total > 0 ? (
+                                    <span style={{fontSize: '13px'}}>{total} reactions</span>
+                                  ) : (
+                                    <span className="noMetaText">No reactions</span>
+                                  );
+                                })()}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ✅ Pagination */}
+      {pagination.totalPages > 1 && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={handlePageChange}
+          isLoading={isPending}
+        />
+      )}
+    </div>
+  );
+};
+
+const ReplyBox = ({ commentId, onAdd }) => {
   return (
     <div className="cs-reply-box">
-      <textarea rows={2} value={val} placeholder="Write a reply..." onChange={(e)=>setVal(e.target.value)} />
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        <div style={{display:'flex', gap:8}}>
-          <button className="cs-tool" type="button" onClick={() => setShowEmoji(s=>!s)}>😊</button>
-          <label className="cs-tool cs-photo">📷
-            <input type="file" accept="image/*" style={{display:'none'}} onChange={(e)=>{
-              const f = e.target.files && e.target.files[0]
-              if (f){
-                setImg(f)
-                const url = URL.createObjectURL(f)
-                setImgPreview(url)
-              }
-              e.target.value = null
-            }} />
-          </label>
-        </div>
-        <div className="cs-actions">
-          <button className="cs-btn" disabled={val.trim() === '' && !imgPreview} onClick={()=>{ onAdd(val, imgPreview); setVal(''); setImg(null); setImgPreview(null)}}>Reply</button>
-        </div>
-      </div>
-      {showEmoji && (
-        <div className="cs-emoji-picker reply">
-          {EMOJIS.map(e => (
-            <button key={e} type="button" className="cs-emoji" onClick={()=> setVal(prev => prev + e)}>{e}</button>
-          ))}
-        </div>
-      )}
-      {imgPreview && (
-        <div className="cs-img-preview">
-          <img src={imgPreview} alt="preview" />
-          <button type="button" className="cs-remove-img" onClick={()=>{ URL.revokeObjectURL(imgPreview); setImg(null); setImgPreview(null); }}>✕</button>
-        </div>
-      )}
+      <RichTextComment
+        placeholder="Write a reply..."
+        submitLabel="Reply"
+        onSubmit={(text, attachments) => {
+          onAdd(commentId, text, attachments);
+        }}
+      />
     </div>
-  )
-}
+  );
+};
 
-export default CommentSection
+export default CommentSection;
