@@ -3,26 +3,51 @@ import Comment from "../models/comment.model.js";
 import Reply from "../models/reply.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import { toggleReaction } from "../utils/toggleReaction.js";
+import { generateBlurhash, getImageDimensions } from "../utils/imageProcessor.js";
 
-// Helper: Upload file to Cloudinary
-const uploadFile = (file, folder) => {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { folder, resource_type: "auto" },
-      (err, result) => {
-        if (err) return reject(err);
-        resolve({
-          url: result.secure_url,
-          type: file.mimetype.startsWith("image/")
-            ? "image"
-            : file.mimetype.startsWith("video/")
-            ? "video"
-            : "file",
-          filename: file.originalname,
-          size: file.size,
-        });
+// Helper: Upload file to Cloudinary with metadata extraction for images
+const uploadFile = async (file, folder) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Determine file type
+      let fileType = "file";
+      if (file.mimetype.startsWith("image")) {
+        fileType = "image";
+      } else if (file.mimetype.startsWith("video")) {
+        fileType = "video";
       }
-    ).end(file.buffer);
+
+      // For images, get dimensions and blurhash
+      let width = null;
+      let height = null;
+      let blurhash = null;
+
+      if (fileType === "image") {
+        const dimensions = await getImageDimensions(file.buffer);
+        width = dimensions.width;
+        height = dimensions.height;
+        blurhash = await generateBlurhash(file.buffer);
+      }
+
+      // Upload to cloudinary
+      cloudinary.uploader.upload_stream(
+        { folder, resource_type: "auto" },
+        (err, result) => {
+          if (err) return reject(err);
+          resolve({
+            url: result.secure_url,
+            type: fileType,
+            filename: file.originalname,
+            size: file.size,
+            width,
+            height,
+            blurhash,
+          });
+        }
+      ).end(file.buffer);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 

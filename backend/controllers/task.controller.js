@@ -1,13 +1,22 @@
 import Task from '../models/task.model.js';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
+import { generateBlurhash, getImageDimensions } from '../utils/imageProcessor.js';
 
 // Multer configuration with file validation
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi/;
-  const mimetype = allowedTypes.test(file.mimetype);
+  // ✅ Allow images, videos, and documents
+  const allowedTypes = /jpeg|jpg|png|gif|webp|mp4|mov|avi|pdf|doc|docx|xls|xlsx|ppt|pptx|txt|zip|rar/;
+  const mimetype = allowedTypes.test(file.mimetype) || 
+                   file.mimetype.includes('pdf') ||
+                   file.mimetype.includes('document') ||
+                   file.mimetype.includes('spreadsheet') ||
+                   file.mimetype.includes('presentation') ||
+                   file.mimetype.includes('text') ||
+                   file.mimetype.includes('zip') ||
+                   file.mimetype.includes('compressed');
   
   if (mimetype) {
     cb(null, true);
@@ -54,26 +63,50 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Process attachments
+   // Process attachments
     const attachments = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         try {
+          // ✅ Determine file type
+          let fileType = "file";
+          if (file.mimetype.startsWith("image")) {
+            fileType = "image";
+          } else if (file.mimetype.startsWith("video")) {
+            fileType = "video";
+          }
+
+          // ✅ For images, get dimensions and blurhash
+          let width = null;
+          let height = null;
+          let blurhash = null;
+
+          if (fileType === "image") {
+            const dimensions = await getImageDimensions(file.buffer);
+            width = dimensions.width;
+            height = dimensions.height;
+            blurhash = await generateBlurhash(file.buffer);
+          }
+
+          // Upload to cloudinary
           const result = await uploadToCloudinary(file.buffer);
           
           attachments.push({
             url: result.secure_url,
             publicId: result.public_id,
-            type: file.mimetype.startsWith("video") ? "video" : "image",
+            type: fileType,
             size: file.size,
-            filename: file.originalname
+            filename: file.originalname,
+            width,      // ✅ Add width
+            height,     // ✅ Add height
+            blurhash,   // ✅ Add blurhash
           });
         } catch (uploadError) {
           console.error('Upload error:', uploadError);
-          // Continue with other files even if one fails
         }
       }
     }
+
 
     // Parse tags if provided as string
     const parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
@@ -94,12 +127,63 @@ export const createTask = async (req, res) => {
       }]
     });
 
+     // ✅ Notification for task assignment
+    if (assignedTo !== req.user.id.toString()) {
+      try {
+        const currentUser = await User.findById(req.user.id).select('firstName lastName displayName');
+        
+        await Notification.create({
+          recipient: assignedTo,
+          sender: req.user.id,
+          type: 'task_assigned',
+          title: 'New Task Assigned',
+          message: `${currentUser.firstName} ${currentUser.lastName} assigned you a task: "${title}"`,
+          link: `/tasks/${task._id}`,
+          relatedTask: task._id
+        });
+      } catch (notifError) {
+        console.error('Notification creation error:', notifError);
+      }
+    }
+
+    // ✅ Notify all followers about new task/post
+    try {
+      const User = mongoose.model('User');
+      const currentUser = await User.findById(req.user.id).select('firstName lastName displayName followers');
+      
+      if (currentUser.followers && currentUser.followers.length > 0) {
+        // Create notifications for all followers
+        const followerNotifications = currentUser.followers.map(followerId => ({
+          recipient: followerId,
+          sender: req.user.id,
+          type: 'task_mention', // Or create a new type 'new_post'
+          title: 'New Post',
+          message: `${currentUser.firstName} ${currentUser.lastName} created a new task: "${title}"`,
+          link: `/tasks/${task._id}`,
+          relatedTask: task._id
+        }));
+
+        // Bulk insert notifications
+        await Notification.insertMany(followerNotifications);
+        console.log(`✅ Notified ${followerNotifications.length} followers`);
+      }
+    } catch (notifError) {
+      console.error('Follower notification error:', notifError);
+    }
+
     // Populate references
-    await task.populate('assignedTo', 'displayName email');
-    await task.populate('createdBy', 'displayName email');
+    // await task.populate('assignedTo', 'displayName email');
+    // await task.populate('createdBy', 'displayName email followers');
+    await task.populate([
+      { path: 'assignedTo', select: 'displayName email firstName lastName userImage' },
+      { path: 'createdBy', select: 'displayName email firstName lastName userImage' }
+    ]);
 
     res.status(201).json({ 
       success: true,
+      message: assignedTo === req.user.id.toString() 
+        ? 'Task created successfully' 
+        : 'Task assigned successfully',
       data: task 
     });
   } catch (error) {
@@ -209,9 +293,13 @@ export const getTasks = async (req, res) => {
     if (limit > 100) limit = 100; // Max 100 items per page
 
     let query = {
-      assignedTo: req.user.id,
-      isArchived: false
-    };
+  isArchived: false,
+  $or: [
+    { assignedTo: req.user.id },
+    { createdBy: req.user.id }
+  ]
+};
+
 
 
     // Add filters
@@ -508,3 +596,4 @@ export const getArchivedTasks = async (req, res) => {
     });
   }
 };
+

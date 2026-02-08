@@ -9,6 +9,10 @@ import {
   deleteCoverPhoto,
   getUserProfile,
   getMyProfile,
+  getUserMedia,
+  trackProfileView,
+  getProfileViewers,
+  getUserMediaCounts,
 } from "../controllers/profile.controller.js";
 import multer from "multer";
 
@@ -24,6 +28,13 @@ router.get('/profile/:userId', getUserProfile);
 // Protected routes
 router.use(verifyToken);
 router.get('/profile/me', verifyToken, getMyProfile);
+
+router.get('/:userId/media/counts', verifyToken, getUserMediaCounts);
+router.get('/:userId/media', verifyToken, getUserMedia);
+
+// routes/profile.route.js
+router.post('/:userId/view', verifyToken, trackProfileView);
+router.get('/:userId/viewers', verifyToken, getProfileViewers);
 
 // Update basic profile info
 router.patch("/profile/info", updateProfileInfo);

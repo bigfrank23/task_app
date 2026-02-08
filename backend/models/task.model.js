@@ -35,6 +35,9 @@ const attachmentSchema = new mongoose.Schema(
     },
     size: Number,
     filename: String,
+    width: Number,      // ✅ Add this
+    height: Number,     // ✅ Add this
+    blurhash: String,     // ✅ Add this for image attachments
   },
   { _id: false },
 );
@@ -92,16 +95,16 @@ const TaskSchema = new mongoose.Schema(
       type: Date,
       required: [true, "Due date is required"],
       index: true,
-      validate: {
-        validator: function (v) {
-          // Only validate on creation
-          if (this.isNew) {
-            return v >= new Date();
-          }
-          return true;
-        },
-        message: "Due date must be in the future",
-      },
+      // validate: {
+      //   validator: function (v) {
+      //     // Only validate on creation
+      //     if (this.isNew) {
+      //       return v >= new Date();
+      //     }
+      //     return true;
+      //   },
+      //   message: "Due date must be in the future",
+      // },
     },
 
     completedAt: {
@@ -208,6 +211,9 @@ const TaskSchema = new mongoose.Schema(
               required: true,
             },
             size: Number,
+            width: Number,      // ✅ Add
+            height: Number,     // ✅ Add
+            blurhash: String, 
           },
         ],
         deleted: {
@@ -248,6 +254,9 @@ const TaskSchema = new mongoose.Schema(
                   required: true,
                 },
                 size: Number,
+                width: Number,      // ✅ Add
+                height: Number,     // ✅ Add
+                blurhash: String, 
               },
             ],
             deleted: {

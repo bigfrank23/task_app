@@ -3,6 +3,8 @@ import Task from '../models/task.model.js'
 import bcrypt from "bcryptjs";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
+import ProfileView from '../models/profileView.model.js';
+import mongoose from "mongoose";
 
 // 1️⃣ Update profile info (name, displayName, email)
 export const updateProfileInfo = async (req, res) => {
@@ -461,6 +463,239 @@ export const updateProfile = async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+};
+
+
+// controllers/profile.controller.js
+// controllers/profile.controller.js
+
+export const getUserMedia = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { type, page = 1, limit = 12 } = req.query;
+
+    console.log('📥 getUserMedia called:', { userId, type, page, limit });
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const taskMatch = {
+      $or: [
+        { createdBy: new mongoose.Types.ObjectId(userId) },
+        { assignedTo: new mongoose.Types.ObjectId(userId) }
+      ]
+    };
+
+    // Get global counts
+    const globalCounts = await Task.aggregate([
+      { $match: taskMatch },
+      { $unwind: "$attachments" },
+      {
+        $group: {
+          _id: "$attachments.type",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    console.log('📊 Global counts:', globalCounts);
+
+    const imageCount = globalCounts.find(c => c._id === "image")?.count || 0;
+    const videoCount = globalCounts.find(c => c._id === "video")?.count || 0;
+    const fileCount = globalCounts.find(c => c._id === "file")?.count || 0;
+
+    // ✅ FIX: Don't group by non-existent _id, use url instead
+    const mediaPipeline = [
+      { $match: taskMatch },
+      { $unwind: "$attachments" },
+      ...(type ? [{ $match: { "attachments.type": type } }] : []),
+      { $sort: { createdAt: -1 } },
+      {
+        $project: {
+          media: "$attachments",
+          taskId: "$_id",
+          taskTitle: "$title",
+          createdAt: "$createdAt"
+        }
+      },
+      { $sort: { createdAt: -1 } }
+    ];
+
+    const allMedia = await Task.aggregate(mediaPipeline);
+    
+    console.log('🎬 All media count:', allMedia.length);
+    console.log('📸 First media item:', allMedia[0]);
+    
+    const totalForType = allMedia.length;
+    const paginatedMedia = allMedia.slice(skip, skip + parseInt(limit));
+    
+    console.log('📄 Paginated media count:', paginatedMedia.length);
+
+    res.json({
+      success: true,
+      counts: {
+        images: imageCount,
+        videos: videoCount,
+        files: fileCount,
+        total: imageCount + videoCount + fileCount
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(totalForType / parseInt(limit)),
+        total: totalForType
+      },
+      media: paginatedMedia
+    });
+  } catch (error) {
+    console.error("❌ Get user media error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+
+// controllers/profile.controller.js
+
+export const getUserMediaCounts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const taskMatch = {
+      $or: [
+        { createdBy: new mongoose.Types.ObjectId(userId) },
+        { assignedTo: new mongoose.Types.ObjectId(userId) }
+      ]
+    };
+
+    // Get global counts of all media types
+    const globalCounts = await Task.aggregate([
+      { $match: taskMatch },
+      { $unwind: "$attachments" },
+      {
+        $group: {
+          _id: "$attachments.type",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const imageCount = globalCounts.find(c => c._id === "image")?.count || 0;
+    const videoCount = globalCounts.find(c => c._id === "video")?.count || 0;
+    const fileCount = globalCounts.find(c => c._id === "file")?.count || 0;
+
+    res.json({
+      success: true,
+      counts: {
+        images: imageCount,
+        videos: videoCount,
+        files: fileCount,
+        total: imageCount + videoCount + fileCount
+      }
+    });
+  } catch (error) {
+    console.error("Get media counts error:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
+
+
+export const trackProfileView = async (req, res) => {
+  try {
+    const { userId } = req.params; // Profile being viewed
+    const viewerId = req.user.id; // Current user viewing
+
+    // Don't track if viewing own profile
+    if (userId === viewerId) {
+      return res.json({ success: true, message: 'Own profile view' });
+    }
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
+    // Try to create view record (will fail silently if already exists today)
+    await ProfileView.findOneAndUpdate(
+      {
+        profileOwner: userId,
+        viewer: viewerId,
+        viewDate: today
+      },
+      {
+        profileOwner: userId,
+        viewer: viewerId,
+        viewDate: today
+      },
+      { upsert: true, new: true }
+    ).catch(() => {
+      // Ignore duplicate key errors (already viewed today)
+    });
+
+    res.json({ success: true, message: 'View tracked' });
+  } catch (error) {
+    console.error('Track profile view error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getProfileViewers = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { days = 30 } = req.query; // Default last 30 days
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+    const startDateStr = startDate.toISOString().split('T')[0];
+
+    // Get total unique viewers
+    const totalViewers = await ProfileView.distinct('viewer', {
+      profileOwner: userId,
+      viewDate: { $gte: startDateStr }
+    });
+
+    // Get recent viewers with details
+    const recentViewers = await ProfileView.find({
+      profileOwner: userId,
+      viewDate: { $gte: startDateStr }
+    })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate('viewer', 'firstName lastName displayName userImage jobTitle')
+      .lean();
+
+    // Group views by date for chart
+    const viewsByDate = await ProfileView.aggregate([
+      {
+        $match: {
+          profileOwner: new mongoose.Types.ObjectId(userId),
+          viewDate: { $gte: startDateStr }
+        }
+      },
+      {
+        $group: {
+          _id: '$viewDate',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalViewers: totalViewers.length,
+        recentViewers,
+        viewsByDate
+      }
+    });
+  } catch (error) {
+    console.error('Get profile viewers error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 

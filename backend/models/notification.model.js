@@ -16,7 +16,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['follow', 'task_comment', 'task_like', 'message', 'task_mention', 'task_assigned'],
+      enum: ['follow', 'task_comment', 'task_like', 'message', 'task_mention', 'task_assigned', 'new_post'],
       required: true,
       index: true
     },
