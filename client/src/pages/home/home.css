@@ -228,6 +228,8 @@ background-color: transparent;
     /* background: rgba(0, 0, 0, 0.8); */
     background: rgb(196 193 193 / 80%);
     padding: 1px;
+    width: 700px;
+    margin: auto;
 }
 
 .middleBody .middleBodyImgs .middleBodyImg{
@@ -484,9 +486,20 @@ background-color: transparent;
     border-radius: 10px;
 }
 
+.middleBodyFile{
+      display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    min-height: 300px;
+}
+
 /* 📱 Mobile */
 @media (max-width: 600px) {
     .home{
+      width: 100%;
+    padding: 10px;
     display: block;
     background-color: #f5f5f5
     }
@@ -511,6 +524,9 @@ background-color: transparent;
     border-radius: 10px;
     box-shadow: none;
      border:1px solid #e0e0e0;
+    }
+    .middleBody .middleBodyImgs{
+        width: 100%;
     }
     .middleBody .middleBodyImgs .middleBodyImg{
         height: unset;

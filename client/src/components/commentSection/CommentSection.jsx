@@ -19,10 +19,11 @@ import useOnlineUsersStore from '../../utils/onlineUsersStore';
 import { LoadingSpinner } from '../tasks/TaskUtils';
 import ReactionPicker from '../reactions/ReactionPicker';
 import Pagination from '../../pages/Dashboard/pagination/Paginaton';
+import OptimizedImage from '../optimizedImage/OptimizedImage';
 
 const CommentSection = ({ taskId }) => {
   const { user } = useAuthStore();
-  const [currentPage, setCurrentPage] = useState(1); // ✅ Add this state
+  const [currentPage, setCurrentPage] = useState(1); 
 
   const commentSectionRef = useRef(null);
   
@@ -167,7 +168,18 @@ const handlePageChange = (page) => {
                         {c.attachments.map((att, idx) => (
                           <div key={idx}>
                             {att.type === 'image' && (
-                              <img src={att.url} alt={att.filename} style={{ maxWidth: 200, borderRadius: 8 }} />
+                              // <img src={att.url} alt={att.filename} style={{ maxWidth: 200, borderRadius: 8 }} onError={(e) => {
+                              //   e.target.src = '/general/images/placeholder.jpg'
+                              // }}
+                              // loading="lazy" />
+                              <OptimizedImage
+                              src={att.url}
+                              alt={att.filename}
+                              width={att.width}
+                              height={att.height}
+                              blurhash={att.blurhash}
+                              className="comment-attachment"
+                            />
                             )}
                             {att.type === 'video' && (
                               <video src={att.url} controls style={{ maxWidth: 200, borderRadius: 8 }} />
@@ -239,7 +251,16 @@ const handlePageChange = (page) => {
                                   {r.attachments.map((att, idx) => (
                                     <div key={idx}>
                                       {att.type === 'image' && (
-                                        <img src={att.url} alt={att.filename} style={{ maxWidth: 150, borderRadius: 8 }} />
+                          //               <img src={att.url} alt={att.filename} style={{ maxWidth: 150, borderRadius: 8 }}  onError={(e) => {
+                          // e.target.src = '/general/images/placeholder.jpg'}}/>
+                                        <OptimizedImage
+                                            src={att.url}
+                                            alt={att.filename}
+                                            width={att.width}
+                                            height={att.height}
+                                            blurhash={att.blurhash}
+                                            
+                                          />
                                       )}
                                       {att.type === 'video' && (
                                         <video src={att.url} controls style={{ maxWidth: 150, borderRadius: 8 }} />

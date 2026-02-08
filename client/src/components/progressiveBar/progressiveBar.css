@@ -2,12 +2,12 @@
     --progress-start: #7b2ff7; /* purple */
     --progress-end: #2af598;   /* green-cyan */
     position: sticky;
-    top: 90px;
+    top: 85px;
     left: 0;
     width: 95%;
     height: 6px;
     background-color: #e6e6e8;
-    z-index: 1234;
+    z-index: 1;
     border-radius: 999px;
     overflow: hidden;
     margin: auto !important;

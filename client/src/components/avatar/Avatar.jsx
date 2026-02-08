@@ -1,4 +1,5 @@
 import { stringToColor } from "../../utils/stringColor";
+import OptimizedImage from "../optimizedImage/OptimizedImage";
 
 const Avatar = ({ image, name, isOnline, size = 36 }) => {
   const initials = name

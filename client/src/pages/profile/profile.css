@@ -456,61 +456,136 @@
     border-radius: 10px;
 }
 
+/* Ensure images maintain aspect ratio */
+/* .profileTaskImgs .optimized-image-container {
+  max-width: 300px;
+  margin: 10px 0;
+} */
+
+.pMiddleBodyImg {
+  border-radius: 10px;
+}
+
+.pMiddleBodyFile{
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* In your profile.css */
+
+/* Activity section improvements */
+.prActivity .activityBtns {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.prActivity .activityBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f3f4f6;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.prActivity .activityBtn:hover {
+  background: #e5e7eb;
+}
+
+.prActivity .activityBtn.active {
+  background: #535bf2;
+  color: white;
+}
+
+/* Masonry adjustments */
+.profileTaskImgs .masonry-grid {
+  margin-top: 10px;
+}
+
+.profileLeft{
+    flex: 1;
+    position: relative;
+    top: 50px;
+    max-width: 300px;
+}
+
 
 /* --- Responsive Breakpoints --- */
 
 /* 📱 Small Mobile (Phones) */
 @media (max-width: 600px) {
+    #header, #progressBox {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    }
     .profile {
     display: block;
     padding: 0;
+    }
+    .profileLeft{
+        position: unset;
+        max-width: unset;
+    }
+    .profileBtnBox {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px;
+    }
+    .bgCoverImg{
+        border-radius: unset;
+        height: 100px;
+    }
+    .prCard {
+        position: relative;
+        box-shadow: none;
+        border: 1px solid #e0e0e0;
+        border-radius: unset;
+        top: 0;
+        padding-bottom: 16px;
+    }
+    .profileContainerTxt {
+        margin-top: 90px;
+        padding: 10px;
+    }
+    .prActivity {
+        margin-top: 0px !important;
+        padding: 10px;
+        border-radius: unset
+    }
+    .activitySlide {
+        width: 100%;
+        height: 290px;
+        padding: 10px;
+    }
+    #middle{
+        margin-top: 15px;
+    }
+    .profileRight{
+        margin: auto;
+    }
+    .profileImgBox{
+        top: 60px;
+    }
+    .profileImg{
+        width: 100px;
+        height: 100px;
+    }
+    .profileContainerTxt{
+        padding-top: 20px;
+    }
 }
-.bgCoverImg{
-    border-radius: unset;
-    height: 100px;
-}
-.profileImgBox {
-    position: absolute;
-    top: 0;
-    transform: translate(50%, 50%);
-    left: 70px;
-    /* margin: auto; */
-}
-.profileImg{
-    width: 100px;
-    height: 100px;
-}
-.profileImgFallback {
-    width: 100px;
-    height: 100px;
-    font-size: 32px;
-  }
-.prCard {
-    position: relative;
-    box-shadow: none;
-    border: 1px solid #e0e0e0;
-    border-radius: unset;
-    top: 0;
-    padding-bottom: 16px;
-}
-.profileContainerTxt {
-    margin-top: 90px;
-    padding: 10px;
-}
-.prActivity {
-    margin-top: 0px !important;
-    padding: 10px;
-    border-radius: unset
-}
-.activitySlide {
-    width: 100%;
-    height: 290px;
-    padding: 10px;
-}
-}
-#middle{
-    margin-top: 15px;
-}
+
 
 /* 📱 Tablet / Large Mobile */
 @media (min-width: 601px) and (max-width: 1023px) {
@@ -550,6 +625,8 @@
 }
 }
 
+
+
 /* 🖥️ Ultra-wide */
 @media (min-width: 1536px) {
 }
@@ -557,6 +634,8 @@
 @media (max-width: 768px) {
   .profileContainer {
     padding: 10px;
+    width: 100%;
+    max-width: unset;
   }
   
   .prActivity {

@@ -1,0 +1,36 @@
+/* components/MediaMasonry/MediaMasonry.css */
+.masonry-grid {
+  display: flex;
+  margin-left: -15px;
+  width: auto;
+}
+
+.masonry-column {
+  padding-left: 15px;
+  background-clip: padding-box;
+}
+
+.masonry-item {
+  margin-bottom: 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.masonry-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.masonry-image,
+.masonry-video {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.masonry-video {
+  object-fit: cover;
+  aspect-ratio: 16/9;
+}

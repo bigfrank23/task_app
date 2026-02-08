@@ -10,6 +10,7 @@ import { EditIcon } from '../../utils/svgIcons';
 import useOnlineUsersStore from '../../utils/onlineUsersStore';
 import { useFollowers } from '../../utils/useSocialFeatures';
 import { formatTime } from '../../utils/time';
+import Avatar from '../avatar/Avatar';
 
 const SideBar = ({showEditProfile, showBottomAnalytics}) => {
   const {user} = useAuthStore()
@@ -70,11 +71,12 @@ const SideBar = ({showEditProfile, showBottomAnalytics}) => {
         <h3 className="sbUsername">{user?.firstName} {user?.lastName}</h3>
         <p className="sbUserTitle">{user?.jobTitle}</p>
         <p className="sbUserBio">{user?.bio}</p>
-        
-        <div className="sbLocation">
-          <LocationPinIcon className='sbLocationIcon'/>
-          <span>{user?.location}</span>
-        </div>
+        {user?.location && (
+          <div className="sbLocation">
+            <LocationPinIcon className='sbLocationIcon'/>
+            <span>{user?.location}</span>
+          </div>
+        )}
         
         {showEditProfile && (
           <div style={{ display: "flex", justifyContent: "center", padding: "10px" }}>
@@ -87,6 +89,7 @@ const SideBar = ({showEditProfile, showBottomAnalytics}) => {
           </div>
         )}
       </div>
+      {followers.length > 0 && (
       <div className="sbMiddle1">
         <div className="sbItems">
           <div className='sbItem'>
@@ -98,33 +101,9 @@ const SideBar = ({showEditProfile, showBottomAnalytics}) => {
         {/* ✅ Map through actual followers with online status */}
         {followers.slice(0, 4).map(follower => (
           <div key={follower._id} className="sbConnections">
-            {
-              follower?.userImage ? (
-                <Link to={`/profile/${follower?._id}`}>
-                  <img 
-                    className='sbConnectionImg' 
-                    src={follower.userImage} 
-                    alt={follower.displayName} 
-                    onError={(e)=> {e.target.src = '/general/images/user.png'; e.target.alt = 'Image fail to load'}}
-                    loading="lazy"
-                  />
-                </Link>
-              ) : (
-                <Link to={`/profile/${follower?._id}`}>
-                  <span className="sbFollowImgFallback">{
-                    `${follower?.firstName?.charAt(0) ?? ""}${
-                    follower?.lastName?.charAt(0) ?? ""
-                  }`.toUpperCase()
-                  }</span>
-                </Link>
-              )
-            }
-            <CircleIcon 
-              className={`sbConnectionStatus ${onlineUsers[follower._id] ? '' : 'offline'}`}
-              style={{ 
-                color: onlineUsers[follower._id] ? '#10b981' : '#6b7280' 
-              }}
-            />
+            <Link to={`/profile/${follower?._id}`}>
+              <Avatar image={follower?.userImage} name={follower?.displayName} isOnline={onlineUsers[follower._id]}/>
+            </Link>
             <div className="sbConnection">
               <h4 className='sbConnectionName'>{follower.displayName}</h4>
               <p className="sbConnectionBio">
@@ -143,6 +122,7 @@ const SideBar = ({showEditProfile, showBottomAnalytics}) => {
           </div>
         )}
       </div>
+      )}
       {showBottomAnalytics && (
       <div className="sbBottom">
         <div className="sbBottomTittle">

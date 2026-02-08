@@ -3,19 +3,28 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import SwitchLeftIcon from '@mui/icons-material/SwitchLeft';
 import SwitchRightIcon from '@mui/icons-material/SwitchRight';
-import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import 'quill-emoji/dist/quill-emoji.css';
+import 'quill-emoji/dist/quill-emoji.js';
+
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import HandshakeIcon from "@mui/icons-material/Handshake";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 
 import ReadMoreText from "../../components/readMoreText/ReadMoreText";
 import Footer from "../../components/footer/Footer";
 import SideBar from "../../components/sideBar/SideBar";
 import Header from "../../components/header/Header";
 import useAuthStore from "../../utils/authStore";
-import { CalendarIcon } from "../../utils/svgIcons";
+import { CalendarIcon, ClockIcon, DislikeSVG, FileSVG, LikedSVG, LikeSVG, VideoSVG } from "../../utils/svgIcons";
 import './dashboard.css';
 import DOMPurify from 'dompurify'
+
 
 import { 
   useTasks, 
@@ -28,11 +37,48 @@ import LoadingSpinner from "../../components/tasks/TaskUtils";
 import ErrorMessage from "../../components/tasks/TaskUtils";
 import { useNotification } from "../../utils/useNotification";
 import Pagination from './pagination/Paginaton';
+import { useConnections } from "../../utils/useSocialFeatures";
+import TaskBadge from "./util/TaskBadge";
+import { formatRelativeTime } from "../../utils/time";
+import { useTaskReactions } from "../../utils/useSocialInteractions";
+import ReactionsUserList from "../../components/reactionsUserList/ReactionsUserList";
+import GlassModal from "../../components/modal/GlassModal";
+import TaskInteractionModal from './TaskInteractionModal';
+import TodayTasksSidebar from "./todayTasksSideBar/TodayTasksSideBar";
+import DailyAgendaSidebar from "./todayTasksSidebar/DailyAgendaSidebar";
+import TodayAgenda from "./todayTasksSidebar/TodayAgenda";
 
 const Dashboard2 = () => {
   const { user } = useAuthStore();
   const headings = ["Task", "Status", "Deadline", "Action"];
   const { showSuccess, showError } = useNotification();
+
+    const [openReactsModal, setOpenReactsModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const [selectedTaskForInteraction, setSelectedTaskForInteraction] = useState(null);
+  const [showInteractionModal, setShowInteractionModal] = useState(false);
+
+  
+  const { data: reactionsData, isLoading } = useTaskReactions(
+    selectedTask?._id,
+    openReactsModal
+  );
+
+  console.log(reactionsData);
+  
+
+  const { data: connections = [], isLoading: connectionsLoading } = useConnections()
+
+  // ✅ Add state for assignedTo
+  const [assignedTo, setAssignedTo] = useState(user?._id || '');
+
+    // Update when user loads
+  useEffect(() => {
+    if (user?._id && !assignedTo) {
+      setAssignedTo(user._id);
+    }
+  }, [user]);
 
   const textareaRef = useRef(null);
 
@@ -61,6 +107,8 @@ const Dashboard2 = () => {
   const pagination = taskResponse?.pagination || { total: 0, pages: 0 };
   const stats = taskResponse?.stats || { total: 0, completed: 0, pending: 0, late: 0 };
 
+  console.log(tasks);
+  
   // Mutations
   const createTaskMutation = useCreateTask();
   const updateStatusMutation = useUpdateTaskStatus();
@@ -116,11 +164,28 @@ const Dashboard2 = () => {
     }
 
     const validFiles = fileArray.filter(file => {
-      const isValidType = file.type.startsWith('image/') || file.type.startsWith('video/');
-      const isValidSize = file.size <= 10 * 1024 * 1024;
+      // ✅ Accept images, videos, and documents
+    const isValidType = 
+      file.type.startsWith('image/') || 
+      file.type.startsWith('video/') ||
+      file.type.includes('pdf') ||
+      file.type.includes('document') ||
+      file.type.includes('spreadsheet') ||
+      file.type.includes('presentation') ||
+      file.type.includes('text') ||
+      file.type.includes('zip') ||
+      file.type === 'application/pdf' ||
+      file.type === 'application/msword' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      file.type === 'application/vnd.ms-excel' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.type === 'application/vnd.ms-powerpoint' ||
+      file.type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      
+    const isValidSize = file.size <= 10 * 1024 * 1024;
       
       if (!isValidType) {
-        showError(`${file.name} is not a valid image or video`);
+        showError(`${file.name} is not a valid file type`);
         return false;
       }
       if (!isValidSize) {
@@ -130,15 +195,35 @@ const Dashboard2 = () => {
       return true;
     });
 
-    const newFiles = validFiles.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-      type: file.type,
-      name: file.name
-    }));
+    // const newFiles = validFiles.map((file) => ({
+    //   file,
+    //   preview: URL.createObjectURL(file),
+    //   type: file.type,
+    //   name: file.name
+    // }));
+  //   setAttachments((prev) => [...prev, ...newFiles]);
+  // };
+    const newFiles = validFiles.map((file) => {
+    // ✅ Determine file type for preview
+    let fileType = 'file';
+    if (file.type.startsWith('image/')) {
+      fileType = 'image';
+    } else if (file.type.startsWith('video/')) {
+      fileType = 'video';
+    }
 
-    setAttachments((prev) => [...prev, ...newFiles]);
-  };
+    return {
+      file,
+      preview: fileType === 'image' ? URL.createObjectURL(file) : null,
+      type: file.type,
+      name: file.name,
+      displayType: fileType
+    };
+  });
+
+  setAttachments((prev) => [...prev, ...newFiles]);
+};
+
 
   const handleFileChange = (e) => {
     processFiles(e.target.files);
@@ -238,7 +323,7 @@ const Dashboard2 = () => {
       description: richDescription || plainText,
       dueDate: new Date(dueDate),
       priority: taskPriority,
-      assignedTo: user._id,
+      assignedTo: assignedTo,
       attachments: fileObjects,
       tags: tags ? tags.split(",").map((tag) => tag.trim()) : []
     }, {
@@ -247,6 +332,7 @@ const Dashboard2 = () => {
         setRichDescription('');
         setRichTitle('');
         setTags('');
+        setAssignedTo(user._id);
         
         attachments.forEach(att => URL.revokeObjectURL(att.preview));
         setAttachments([]);
@@ -309,6 +395,35 @@ const Dashboard2 = () => {
   if (error) {
     return <ErrorMessage message={error.message} />;
   }
+
+// ✅ SAFE reaction counts
+  const reactionCounts = (task) => ({
+    like: task.reactions?.like?.length || 0,
+    love: task.reactions?.love?.length || 0,
+    celebrate: task.reactions?.celebrate?.length || 0,
+    dislike: task.reactions?.dislike?.length || 0,
+    total:
+      (task.reactions?.like?.length || 0) +
+      (task.reactions?.love?.length || 0) +
+      (task.reactions?.celebrate?.length || 0) +
+      (task.reactions?.dislike?.length || 0),
+  });
+
+
+
+  const pluralize = (count, singular, plural = singular + 's') =>
+  count === 1 ? `${count} ${singular}` : `${count} ${plural}`;
+
+  const getTotalCommentsCount = (task) => {
+  if (!task.comments || task.comments.length === 0) return 0;
+  
+  const commentsCount = task.comments.filter(c => !c.deleted).length;
+  const repliesCount = task.comments.reduce((total, comment) => {
+    return total + (comment.replies?.length || 0);
+  }, 0);
+  
+  return commentsCount + repliesCount;
+};
 
   return (
     <>
@@ -447,236 +562,324 @@ const Dashboard2 = () => {
             )}
 
             {/* Task Items */}
-            {!isPending && tasks.map((task, index) => (
+{!isPending && tasks.map((task, index) => {
+  // ✅ Calculate counts for THIS task
+  const counts = reactionCounts(task);
+  
+  return (
+    <div
+      key={task._id}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 1.5fr',
+        gap: '20px',
+        padding: '20px',
+        background: index % 2 === 0 ? '#ffffff' : '#f9fafb',
+        borderRadius: '12px',
+        marginBottom: '10px',
+        alignItems: 'center',
+        transition: 'all 0.2s',
+        border: '1px solid #e5e7eb'
+      }}
+      className="task-row"
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateX(5px)';
+        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateX(0)';
+        e.currentTarget.style.boxShadow = 'none';
+      }}
+    >
+      {/* Task Content */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '15px'
+      }} className="task-content">
+        <input
+          type="checkbox"
+          checked={task.status === "completed"}
+          onChange={() => handleToggleTask(task._id, task.status)}
+          disabled={updateStatusMutation.isPending}
+          style={{
+            width: '20px',
+            height: '20px',
+            cursor: 'pointer',
+            accentColor: getStatusColor(task.status),
+            marginTop: '2px'
+          }}
+        />
+
+        <div style={{ flex: 1 }}>
+          <h3>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(task?.title || "")
+              }}
+            />
+          </h3>
+          
+          <TaskBadge task={task} user={user} />
+
+          <ReadMoreText>
+            <span style={{
+              textDecoration: task?.status === 'completed' ? 'line-through' : 'none',
+              opacity: task.status === 'completed' ? 0.6 : 1,
+              color: '#1f2937'
+            }}>
               <div
-                key={task._id}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2fr 1fr 1fr 1.5fr',
-                  gap: '20px',
-                  padding: '20px',
-                  background: index % 2 === 0 ? '#ffffff' : '#f9fafb',
-                  borderRadius: '12px',
-                  marginBottom: '10px',
-                  alignItems: 'center',
-                  transition: 'all 0.2s',
-                  border: '1px solid #e5e7eb'
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(task?.description || "")
                 }}
-                className="task-row"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateX(5px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateX(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                {/* Task Content */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '15px'
-                }} className="task-content">
-                  <input
-                    type="checkbox"
-                    checked={task.status === "completed"}
-                    onChange={() => handleToggleTask(task._id, task.status)}
-                    disabled={updateStatusMutation.isPending}
+              />
+            </span>
+          </ReadMoreText>
+          
+          <div style={{display: 'flex', gap: '5px'}}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px',
+              color: '#56687a',
+              fontSize: '0.585rem',
+              marginTop: '4px'
+            }}>
+              <span>Created At:</span>
+              <CalendarIcon size={10} />
+              {new Date(task?.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+          
+          <div style={{display: "flex", gap: '3px', fontSize: '0.585rem', color: '#56687a', alignItems: 'center', marginBottom: '4px' }}>
+            <ClockIcon size={10} color="#56687a" />
+            <span>{formatRelativeTime(task?.createdAt)}</span>
+          </div>
+          
+          {task.priority && (
+            <span style={{
+              display: 'inline-block',
+              marginTop: '5px',
+              fontSize: '0.75rem',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: task.priority === 'high' ? '#fef2f2' : task.priority === 'low' ? '#f0fdf4' : '#E0E7FF',
+              color: task.priority === 'high' ? '#dc2626' : task.priority === 'low' ? '#16a34a' : '#3730A3' 
+            }}>
+              {task.priority}
+            </span>
+          )}
+          
+          {/* Attachments Preview */}
+          {task.attachments && task.attachments.length > 0 && (
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              flexWrap: 'wrap',
+              marginTop: '8px',
+              padding: '8px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb'
+            }}>
+              {task.attachments.slice(0, 3).map((attachment, idx) => {
+                const isImage = attachment.type?.startsWith('image');
+                const isVideo = attachment.type?.startsWith('video');
+                return (
+                  <div 
+                    key={idx}
                     style={{
-                      width: '20px',
-                      height: '20px',
+                      position: 'relative',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '6px',
+                      overflow: 'hidden',
+                      background: '#e5e7eb',
                       cursor: 'pointer',
-                      accentColor: getStatusColor(task.status),
-                      marginTop: '2px'
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
-                  />
-
-                  <div style={{ flex: 1 }}>
-                    <h3>
-                    <div
-                        dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(task?.title || "")
+                    onClick={() => window.open(attachment.url, '_blank')}
+                  >
+                    {isImage ? (
+                      <img
+                        src={attachment.url}
+                        alt={attachment.filename}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.target.src = '/general/images/placeholder.jpg'
                         }}
+                        loading="lazy"
                       />
-                    </h3>
-
-                    <ReadMoreText>
-                      <span style={{
-                        textDecoration: task?.status === 'completed' ? 'line-through' : 'none',
-                        opacity: task.status === 'completed' ? 0.6 : 1,
-                        color: '#1f2937'
-                      }}>
-                         <div
-                            dangerouslySetInnerHTML={{
-                              __html: DOMPurify.sanitize(task?.description || "")
-                            }}
-                          />
-                      </span>
-                    </ReadMoreText>
-                    {task.priority && (
-                      <span style={{
-                        display: 'inline-block',
-                        marginTop: '5px',
-                        fontSize: '0.75rem',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        background: task.priority === 'high' ? '#fef2f2' : task.priority === 'low' ? '#f0fdf4' : '#E0E7FF',
-                        color: task.priority === 'high' ? '#dc2626' : task.priority === 'low' ? '#16a34a' : '#3730A3' 
-                      }}>
-                        {task.priority}
-                      </span>
-                    )}
-                    {/* Attachments Preview */}
-                    {task.attachments && task.attachments.length > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        gap: '6px',
-                        flexWrap: 'wrap',
-                        marginTop: '8px',
-                        padding: '8px',
-                        background: '#f9fafb',
-                        borderRadius: '8px',
-                        border: '1px solid #e5e7eb'
-                      }}>
-                        {task.attachments.slice(0, 3).map((attachment, idx) => (
-                          <div 
-                            key={idx}
-                            style={{
-                              position: 'relative',
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '6px',
-                              overflow: 'hidden',
-                              background: '#e5e7eb',
-                              cursor: 'pointer'
-                            }}
-                            onClick={() => window.open(attachment.url, '_blank')}
-                          >
-                            {attachment.type === 'video' ? (
-                              <svg viewBox="0 0 24 24" style={{ width: '20px', height: '20px', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fill: 'white' }}>
-                                <path d="M8 5v14l11-7z"/>
-                              </svg>
-                            ) : (
-                              <img 
-                                src={attachment.url} 
-                                alt={attachment.filename}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover'
-                                }}
-                              />
-                            )}
-                          </div>
-                        ))}
-                        {task.attachments.length > 3 && (
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            background: '#6b7280',
-                            borderRadius: '6px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '0.75rem',
-                            color: 'white',
-                            cursor: 'pointer'
-                          }}
-                          onClick={() => window.open(task.attachments[3].url, '_blank')}
-                          >
-                            +{task.attachments.length - 3}
-                          </div>
-                        )}
-                      </div>
+                    ) : isVideo ? (
+                      <VideoSVG />
+                    ) : (
+                      <FileSVG />
                     )}
                   </div>
-                </div>
-
-                {/* Status */}
-                <div className="task-status">
-                  <span style={{
-                    display: 'inline-block',
-                    padding: '6px 16px',
-                    borderRadius: '20px',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    background: `${getStatusColor(task.status)}20`,
-                    color: getStatusColor(task.status),
-                    border: `2px solid ${getStatusColor(task.status)}40`
-                  }}>
-                    {task.status.replace('_', ' ')}
-                  </span>
-                </div>
-
-                {/* Deadline */}
-                <div className="task-deadline" style={{
+                );
+              })}
+              {task.attachments.length > 3 && (
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  background: '#6b7280',
+                  borderRadius: '6px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  color: '#6b7280',
-                  fontSize: '0.875rem'
-                }}>
-                  <CalendarIcon size={14} />
-                  {new Date(task.dueDate).toLocaleDateString()}
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+                onClick={() => window.open(task.attachments[3].url, '_blank')}
+                >
+                  +{task.attachments.length - 3}
                 </div>
+              )}
+            </div>
+          )}
+          
+          {/* ✅ Reactions and Comments */}
+          <div>
+            <div className="middleBodyReacts" id="middleBodyReacts">
+                <div className="mdBodyIcons"
+                style={{ cursor: counts.total > 0 ? "pointer" : "default" }}
+                onClick={() => {
+                  if (counts.total > 0) {
+                    setSelectedTask(task);
+                    setOpenReactsModal(true);
+                  }
+                }}
+              >
+                {counts.total > 0 ? (
+                  <>
+                    {counts.like > 0 && (
+                      <div className="likeIconBg reactPop">
+                        <ThumbUpIcon style={{ fontSize: 10, color: '#fff' }} />
+                      </div>
+                    )}
 
-                {/* Actions */}
-                <div className="task-actions" style={{
-                  display: 'flex',
-                  gap: '10px',
-                  flexWrap: 'wrap'
-                }}>
-                  <button
-                    disabled={task.status === 'completed'}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '8px 16px',
-                      background: task.status !== 'completed' ? '#535bf2' : '#e5e7eb',
-                      color: task.status !== 'completed' ? 'white' : '#9ca3af',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: task.status !== 'completed' ? 'pointer' : 'not-allowed',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      flex: 1,
-                      minWidth: '80px',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <EditNoteIcon style={{ fontSize: '1.125rem' }} />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTask(task._id)}
-                    disabled={deleteTaskMutation.isPending}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '8px 16px',
-                      background: '#ef4444',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      flex: 1,
-                      minWidth: '80px',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <DeleteOutlineIcon style={{ fontSize: '1.125rem' }} />
-                    Delete
-                  </button>
+                    {counts.love > 0 && (
+                      <div className="heartIconBg reactPop">
+                        <FavoriteIcon style={{ fontSize: 10, color: '#fff' }} />
+                      </div>
+                    )}
+
+                    {counts.celebrate > 0 && (
+                      <div className="handShakeIconBg reactPop">
+                        <HandshakeIcon style={{ fontSize: 10, color: '#fff' }} />
+                      </div>
+                    )}
+
+                    {counts.dislike > 0 && (
+                      <div className="dislikeIconBg reactPop">
+                        <ThumbDownIcon style={{ fontSize: 10, color: '#fff' }} />
+                      </div>
+                    )}
+
+                    <span>{pluralize(counts.total, 'like')}</span>
+                  </>
+                ) : (
+                  <span className="noMetaText" id="noMetaText">No likes yet</span>
+                )}
+              </div>
+
+              <div className="mdComments">
+                <div 
+                id="mdCommentsL"
+              style={{display: "flex", alignItems: 'center', cursor: 'not-allowed'}}
+              // onClick={() => {
+              //   setSelectedTaskForInteraction(task);
+              //   setShowInteractionModal(true);
+              // }}
+            >
+              <ChatBubbleOutlineIcon style={{color: "#293138", fontSize: "10px"}}/>
+              <span style={{width: 'max-content'}}>
+                {getTotalCommentsCount(task) > 0
+                  ? pluralize(getTotalCommentsCount(task), 'comment')
+                  : 'No comments yet'}
+              </span>
+                </div>
+                <div style={{display: "flex", alignItems: 'center'}}>
+                  <BookmarkBorderIcon style={{color: "#293138", fontSize: "10px", cursor: "not-allowed"}}/>
+                  <span style={{width: 'max-content'}}>
+                    {task?.saves > 0
+                      ? pluralize(task.saves, 'save')
+                      : <span className="noMetaText">No saves yet</span>
+                    }
+                  </span>
                 </div>
               </div>
-            ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="task-status">
+        <span style={{
+          display: 'inline-block',
+          padding: '6px 16px',
+          borderRadius: '20px',
+          fontSize: '0.75rem',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          background: `${getStatusColor(task.status)}20`,
+          color: getStatusColor(task.status),
+          border: `2px solid ${getStatusColor(task.status)}40`
+        }}>
+          {task.status.replace('_', ' ')}
+        </span>
+      </div>
+
+      {/* Deadline */}
+      <div className="task-deadline" style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        color: '#6b7280',
+        fontSize: '0.875rem'
+      }}>
+        <CalendarIcon size={14} />
+        {new Date(task.dueDate).toLocaleDateString()}
+      </div>
+
+      {/* Actions */}
+      <div className="task-actions" style={{
+        display: 'flex',
+        gap: '10px',
+        flexWrap: 'wrap'
+      }}>
+        <button
+          onClick={() => handleDeleteTask(task._id)}
+          disabled={deleteTaskMutation.isPending}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '8px 16px',
+            background: '#ef4444',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            flex: 1,
+            minWidth: '80px',
+            justifyContent: 'center'
+          }}
+        >
+          <DeleteOutlineIcon style={{ fontSize: '1.125rem' }} />
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+})}
 
             {/* ✅ PAGINATION COMPONENT */}
             {!isPending && tasks.length > 0 && (
@@ -808,7 +1011,15 @@ const Dashboard2 = () => {
                 />
               </div>
             </div>
-              <div style={{marginBottom: '18px'}}>
+            
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '15px',
+              marginBottom: '15px'
+            }}>
+              {/* Tags field */}
+              <div>
                 <label style={{
                   display: 'block',
                   marginBottom: '8px',
@@ -816,12 +1027,13 @@ const Dashboard2 = () => {
                   fontWeight: '600',
                   color: '#374151'
                 }}>
-                  Tag
+                  Tags (Optional)
                 </label>
                 <input
                   type="text"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
+                  placeholder="e.g., urgent, review, meeting"
                   style={{
                     width: '100%',
                     padding: '12px',
@@ -834,8 +1046,75 @@ const Dashboard2 = () => {
                   onFocus={(e) => e.target.style.borderColor = '#535bf2'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
-              <span style={{color: '#555', fontSize: '12px'}}>Don't worry, users won't see your tag(s)</span>
+                <span style={{color: '#6b7280', fontSize: '0.75rem', marginTop: '4px', display: 'block'}}>
+                  Comma-separated (only you can see these)
+                </span>
               </div>
+
+              {/* Assign To field */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  marginBottom: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: '#374151'
+                }}>
+                  Assign To
+                </label>
+                <select
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                  disabled={connectionsLoading}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '10px',
+                    fontSize: '1rem',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    cursor: connectionsLoading ? 'wait' : 'pointer',
+                    background: connectionsLoading ? '#f3f4f6' : 'white'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#535bf2'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                >
+                  {/* Self */}
+                  <option value={user?._id}>
+                    👤 Myself ({user?.displayName})
+                  </option>
+
+                  {/* Connections */}
+                  {connections.length > 0 && (
+                    <optgroup label="─── My Connections ───">
+                      {connections.map((connection) => (
+                        <option key={connection._id} value={connection._id}>
+                          🤝 {connection.firstName} {connection.lastName} (@{connection.displayName})
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+
+                  {/* Loading state */}
+                  {connectionsLoading && (
+                    <option disabled>Loading connections...</option>
+                  )}
+
+                  {/* Empty state */}
+                  {!connectionsLoading && connections.length === 0 && (
+                    <option disabled>No connections yet - connect with users to assign tasks</option>
+                  )}
+                </select>
+                <span style={{color: '#6b7280', fontSize: '0.75rem', marginTop: '4px', display: 'block'}}>
+                  {assignedTo === user?._id 
+                    ? 'Assigning to yourself' 
+                    : connections.find(c => c._id === assignedTo)
+                      ? `Assigning to ${connections.find(c => c._id === assignedTo)?.firstName}`
+                      : 'Select a person'}
+                </span>
+              </div>
+            </div>
 
               {/* Title Field - Rich Text */}
             <div style={{
@@ -870,7 +1149,8 @@ const Dashboard2 = () => {
                 style={{
                   borderRadius: '12px',
                   overflow: 'hidden',
-                  height: '150px'
+                  height: '120px',
+                  borderBottom: '1px solid #ddd'
                 }}
               />
             </div>
@@ -908,7 +1188,8 @@ const Dashboard2 = () => {
                   id="fileInput"
                   type="file"
                   multiple
-                  accept="image/*,video/*"
+                  // accept="image/*,video/*"
+                  accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
                 />
@@ -950,7 +1231,7 @@ const Dashboard2 = () => {
                         width: '100%',
                         height: '100%'
                       }}>
-                        {item.type.startsWith('image') ? (
+                        {item.displayType === 'image' ? (
                           <img
                             src={item.preview}
                             alt={item.name}
@@ -960,7 +1241,7 @@ const Dashboard2 = () => {
                               objectFit: 'cover'
                             }}
                           />
-                        ) : (
+                        ) : item.displayType === 'video' ? (
                           <div style={{
                             width: '100%',
                             height: '100%',
@@ -987,11 +1268,42 @@ const Dashboard2 = () => {
                               {item.name}
                             </span>
                           </div>
+                        ) : (
+                          // ✅ File icon for documents
+                          <div style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: '#3b82f6',
+                            color: 'white',
+                            padding: '8px'
+                          }}>
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
+                              <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                            </svg>
+                            <span style={{
+                              fontSize: '0.65rem',
+                              marginTop: '4px',
+                              textAlign: 'center',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              width: '100%',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical'
+                            }}>
+                              {item.name}
+                            </span>
+                          </div>
                         )}
                       </div>
 
                       {/* Remove button */}
-                      <button
+                      <div
                         onClick={(e) => {
                           e.stopPropagation();
                           removeAttachment(index);
@@ -1020,7 +1332,7 @@ const Dashboard2 = () => {
                         onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
                       >
                         ×
-                      </button>
+                      </div>
 
                       {/* File type badge */}
                       <div style={{
@@ -1035,7 +1347,8 @@ const Dashboard2 = () => {
                         fontWeight: '600',
                         textTransform: 'uppercase'
                       }}>
-                        {item.type.split('/')[0]}
+                        {/* {item.type.split('/')[0]} */}
+                        {item.name.split('.').pop()}
                       </div>
                     </div>
                   ))}
@@ -1179,11 +1492,24 @@ const Dashboard2 = () => {
                   value={richDescription}
                   onChange={setRichDescription}
                   placeholder="Enter your task with rich formatting..."
+                  modules={{
+                  toolbar: [
+                    [{ 'header': [1, 2, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'blockquote'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    ['clean'],
+                    ['emoji']
+                  ],
+                }}
                   style={{
                     marginBottom: '15px',
                     borderRadius: '12px',
                     overflow: 'hidden'
                   }}
+                  
                 />
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                   <button
@@ -1225,7 +1551,24 @@ const Dashboard2 = () => {
             )}
           </div>
         </div>
+        <div className="rightbar">
+          <DailyAgendaSidebar tasks={tasks} />
+        </div>
       </div>
+      <GlassModal
+        open={openReactsModal}
+        onClose={() => {
+          setOpenReactsModal(false);
+          setSelectedTask(null);
+        }}
+        title="Reactions"
+      >
+        {isLoading ? (
+          <LoadingSpinner message="Loading reactions..." />
+        ) : (
+          <ReactionsUserList reactions={reactionsData} />
+        )}
+      </GlassModal>
       <Footer />
 
       {/* Mobile Responsive Styles */}
@@ -1294,6 +1637,17 @@ const Dashboard2 = () => {
           border-top-right-radius: 12px;
         }
       `}</style>
+
+      {/* Add the interaction modal */}
+      <TaskInteractionModal
+        task={selectedTaskForInteraction}
+        open={showInteractionModal}
+        onClose={() => {
+          setShowInteractionModal(false);
+          setSelectedTaskForInteraction(null);
+        }}
+        user={user}
+      />
     </>
   );
 };

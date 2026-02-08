@@ -1,0 +1,146 @@
+/* Clean Minimal Modern Design */
+.daily-agenda {
+  width: 280px;
+  height: fit-content;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  top: 30px;
+}
+
+/* Header */
+.agenda-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* .agenda-header h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+} */
+
+/* Sections */
+.agenda-section-header {
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  transition: all 0.2s ease;
+}
+
+.agenda-section-header:last-child{
+    margin-top: 9px;
+}
+
+.agenda-section-header:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.agenda-count {
+  background: #535bf2;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 50%;
+ border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Section Body */
+.agenda-section-body {
+  padding: 4px 0;
+}
+
+/* Task Items */
+.agenda-task {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease;
+}
+
+.agenda-task:hover {
+  transform: translateX(4px);
+}
+
+.agenda-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.agenda-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+/* Priority Colors */
+.priority-high {
+  border-left: 3px solid #dc2626;
+}
+
+.priority-medium {
+  border-left: 3px solid #3730A3;
+}
+
+.priority-low {
+  border-left: 3px solid #16a34a;
+}
+
+.agenda-task.priority-high:hover {
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+.agenda-task.priority-medium:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.agenda-task.priority-low:hover {
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+/* Empty States */
+.agenda-empty {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  padding: 20px 8px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .daily-agenda {
+    display: none;
+  }
+}

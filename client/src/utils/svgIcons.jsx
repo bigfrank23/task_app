@@ -68,10 +68,7 @@ export const EditIcon = () => (
   </svg>
 );
 
-export const DeleteIcon = ({
-  size = 24,
-  color = 'currentColor'
-}) => (
+export const DeleteIcon = ({ size = 24, color = "currentColor" }) => (
   <svg
     width={size}
     height={size}
@@ -87,21 +84,11 @@ export const DeleteIcon = ({
   </svg>
 );
 
-export const DeleteIcon2 = ({
-  size = 24,
-  color = 'currentColor'
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill={color}
-  >
+export const DeleteIcon2 = ({ size = 24, color = "currentColor" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
     <path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
   </svg>
 );
-
-
 
 export const MenuIcon = () => (
   <svg
@@ -306,12 +293,20 @@ export const CheckMarkIcon = ({
   color = "currentColor",
   className = "",
 }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-     stroke={color} strokeWidth="2" className={className}
-     strokeLinecap="round" strokeLinejoin="round" width={size} height={size}>
-  <path d="M5 13l4 4L19 7" />
-</svg>
-
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    className={className}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width={size}
+    height={size}
+  >
+    <path d="M5 13l4 4L19 7" />
+  </svg>
 );
 
 export const AttachmentIcon = ({
@@ -319,19 +314,83 @@ export const AttachmentIcon = ({
   color = "currentColor",
   className = "",
 }) => (
- <svg
-  xmlns="http://www.w3.org/2000/svg"
-  width={size}
-  height={size}
-  viewBox="0 0 24 24"
-  fill="none"
-  stroke={color}
-  strokeWidth="2"
-  strokeLinecap="round"
-  strokeLinejoin="round"
->
-  <path d="M21.44 11.05l-8.49 8.49a5 5 0 01-7.07-7.07l9.9-9.9a3.5 3.5 0 014.95 4.95l-9.9 9.9a2 2 0 01-2.83-2.83l8.49-8.48" />
-</svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M21.44 11.05l-8.49 8.49a5 5 0 01-7.07-7.07l9.9-9.9a3.5 3.5 0 014.95 4.95l-9.9 9.9a2 2 0 01-2.83-2.83l8.49-8.48" />
+  </svg>
+);
 
+export const ImageErrorSVG = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="#9ca3af">
+    <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14l4-4 3 3 5-5 6 6z" />
+  </svg>
+);
 
+export const FileSVG = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="#6b7280">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+  </svg>
+);
+
+export const VideoSVG = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
+    <path d="M8 5v14l11-7z" />
+  </svg>
+);
+
+export const LikeSVG = ({size = 24,
+  color = "currentColor",
+  className = "",}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill={color}
+  >
+    <path d="M2 21h4V9H2v12zm20-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L13 1 6.59 7.41C6.22 7.78 6 8.3 6 8.83V19c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" />
+  </svg>
+);
+
+export const LikedSVG = ({size = 24,
+  color = "currentColor",
+  className = "",}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill={color}
+  >
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+  </svg>
+);
+
+export const DislikeSVG = ({size = 24,
+  color = "currentColor",
+  className = "",}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill={color}
+  >
+    <path
+      d="M22 3h-4v12h4V3zM2 14c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32
+           c0 .41.17.79.44 1.06L11 23l6.41-6.41
+           c.37-.37.59-.89.59-1.42V5c0-1.1-.9-2-2-2H7
+           c-.83 0-1.54.5-1.84 1.22L2.14 11.27
+           c-.09.23-.14.47-.14.73v2z"
+    />
+  </svg>
 );

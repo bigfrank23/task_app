@@ -84,7 +84,7 @@ const MessageBubble = ({ msg, isCurrentUser, isPending, onDelete, onUndo }) => {
           <>
           {msg.attachments?.map((att, idx) => (
             <div key={idx}>
-              {att.type === 'image' && <img src={att.url} alt={att.filename} style={{ maxWidth: '200px', borderRadius: 8 }} />}
+              {att.type === 'image' && <img src={att.url} alt={att.filename} style={{ maxWidth: '200px', borderRadius: 8 }} onError={(e)=> {e.target.src = '/general/images/placeholder.jpg'; e.target.alt = 'Image fail to load'}}/>}
               {att.type === 'video' && <video src={att.url} controls style={{ maxWidth: '200px', borderRadius: 8 }} />}
               {att.type === 'file' && (
                 <a href={att.url} target="_blank" rel="noopener noreferrer" style={{ color: isCurrentUser ? 'white' : '#1f2937' }}>

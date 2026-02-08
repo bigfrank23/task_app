@@ -1,0 +1,69 @@
+.today-agenda {
+  position: sticky;
+  top: 90px;
+  width: 260px;
+  padding: 14px;
+  background: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  height: fit-content;
+}
+
+.today-agenda-header {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.today-agenda-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.today-agenda-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 6px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.today-agenda-item:hover {
+  background: #f3f4f6;
+}
+
+.agenda-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.agenda-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.today-agenda-empty {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  padding: 12px 0;
+}
+
+/* highlight when scrolled to */
+.task-highlight {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  transition: outline 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .today-agenda {
+    display: none;
+  }
+}

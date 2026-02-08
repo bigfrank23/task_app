@@ -16,6 +16,7 @@ import { stringToColor } from "../../utils/stringColor";
 import useTaskUIStore from "../../utils/taskUIStore";
 import MessageButton from "../messages/MessageButton";
 import NotificationBell from "../notifications/NotificationBell";
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const Header = () => {
   const [query, setQuery] = useState("");
@@ -74,7 +75,10 @@ const Header = () => {
     <>
       <div className="header" id="header">
         <div className="headerLeft">
-          <LogoDevIcon />
+          <a href="/" className="homeLink">
+              <HomeIcon className="icon" />
+              <p>Home</p>
+            </a>
           <div className="search">
             <SearchIcon className="searchIcon" />
             <input
@@ -91,9 +95,9 @@ const Header = () => {
         </div>
         <div className="headerRight">
           <div className="headerRightItem">
-            <a href="/">
-              <HomeIcon className="icon" />
-              <p>Home</p>
+            <a href="/dashboard" className="dashboardLink">
+              <DashboardIcon className="icon" />
+              <p>Dashboard</p>
             </a>
           </div>
           <div  style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

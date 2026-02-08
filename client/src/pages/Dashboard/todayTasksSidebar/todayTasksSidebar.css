@@ -1,0 +1,70 @@
+.today-sidebar {
+  /* position: sticky;
+  top: 90px; */
+  width: 280px;
+  height: fit-content;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  top: 30px;
+}
+
+.today-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.today-task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.today-task-item {
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9fafb;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease;
+}
+
+.today-task-item:hover {
+  transform: translateX(4px);
+}
+
+.today-task-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.today-task-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.no-task {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-align: center;
+  padding: 20px 0;
+}
+
+@media (max-width: 1024px) {
+  .today-sidebar {
+    display: none;
+  }
+}
+

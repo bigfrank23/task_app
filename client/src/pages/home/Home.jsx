@@ -23,6 +23,9 @@ import DOMPurify from 'dompurify'
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import InfiniteScroll from 'react-infinite-scroll-component'
 
+import OptimizedImage from '../../components/optimizedImage/OptimizedImage';
+ 
+
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/scrollbar';
@@ -44,6 +47,8 @@ import { useTaskReactions, useToggleReaction, useToggleSave } from '../../utils/
 import ReactionPicker from '../../components/reactions/ReactionPicker';
 import GlassModal from '../../components/modal/GlassModal';
 import ReactionsUserList from '../../components/reactionsUserList/ReactionsUserList';
+import { SafeFile, SafeImage, SafeVideo } from './AttachmentFallback';
+import MediaLightbox from '../../media/mansoryGrid/MediaLightBox';
 
 const Home = () => {
   const {user} = useAuthStore()
@@ -57,7 +62,6 @@ const { data: reactionsData, isLoading } = useTaskReactions(
   selectedTask?._id,
   openReactsModal
 );
-
 
 
   
@@ -78,6 +82,10 @@ const { onlineUsers } = useOnlineUsersStore();
   const toggleSaveMutation = useToggleSave();
   const [openCommentSections, setOpenCommentSections] = useState({});
    const toggleReactionMutation = useToggleReaction();
+
+const [lightboxOpen, setLightboxOpen] = useState(false);
+const [lightboxIndex, setLightboxIndex] = useState(0);
+const [lightboxMedia, setLightboxMedia] = useState([]);
 
   //  const handleToggleLike = (taskId) => {
   //   toggleLikeMutation.mutate(taskId);
@@ -144,6 +152,18 @@ const { onlineUsers } = useOnlineUsersStore();
     <LoadingSpinner message='Home Page loading...'/>
   </div>
   }
+
+  // Handle opening lightbox from task attachments
+const handleOpenTaskLightbox = (attachments, startIndex) => {
+  // Filter only images and videos
+  const viewableMedia = attachments.filter(
+    att => att.type === "image" || att.type === "video"
+  );
+  
+  setLightboxMedia(viewableMedia);
+  setLightboxIndex(startIndex);
+  setLightboxOpen(true);
+};
   
 
   return (
@@ -155,14 +175,6 @@ const { onlineUsers } = useOnlineUsersStore();
           <div className="lTop">
             <SideBar showEditProfile={false} showBottomAnalytics={false}/>
         </div>
-            <div className="lBottom">
-              <div style={{display: "flex", justifyContent: "space-between", marginBottom: "5px"}}>
-                <p>Profile View</p>
-                <span>2</span>
-              </div>
-                
-              <p>View all Analytics</p>
-            </div>
         </div>
           <div className="middle">
         <InfiniteScroll
@@ -199,7 +211,7 @@ const { onlineUsers } = useOnlineUsersStore();
                   Error loading tasks
                 </div>
               ) : tasks.length === 0 ? (
-                <div style={{textAlign: 'center', padding: '50px', marginTop: '10px'}}>No tasks found</div>
+                <div style={{textAlign: 'center', padding: '60px 20px', color: '#111'}}> <h2>No tasks yet. Visit <Link to="/dashboard">Dashboard</Link> to create tasks.</h2></div>
               ) : (
                 tasks.map((task) => {
                   const counts = reactionCounts(task)
@@ -212,13 +224,11 @@ const { onlineUsers } = useOnlineUsersStore();
                     </Link>
                     <div className="middleHeaderTitle">
                       <h4>{task?.createdBy?.displayName}</h4>
-                      <p>{task?.connections} connections</p>
                       <div style={{display: "flex", gap: "10px"}}>
                         <div style={{display: "flex"}}>
                           <AccessTimeFilledIcon style={{color: "#56687a", fontSize: "9px", alignSelf: "center"}} />
                           <span>{formatRelativeTime(task?.createdAt)}</span>
                         </div>
-                        <PublicIcon style={{color: "#56687a", fontSize: "9px", alignSelf: "center"}}/>
                       </div>
                     </div>
                   </div>
@@ -324,47 +334,46 @@ const { onlineUsers } = useOnlineUsersStore();
                 <>
                   {/* Single attachment */}
                   {task?.attachments?.length === 1 && (
-                    <img
-                      src={task.attachments[0].url}
-                      alt={task.attachments[0].filename}
-                      className="middleBodyImg"
-                      onError={(e)=> {e.target.src = '/general/images/placeholder.jpg'; e.target.alt = 'Image fail to load'}}
-                      loading="lazy"
-                    />
+                    <div onClick={() => handleOpenTaskLightbox(task.attachments, 0)}>
+                      <OptimizedImage
+                        src={task.attachments[0].url}
+                        alt={task.attachments[0].filename}
+                        width={task.attachments[0].width}
+                        height={task.attachments[0].height}
+                        blurhash={task.attachments[0].blurhash}
+                        className="middleBodyImg"
+                        priority={true} // First few posts load eagerly
+                      />
+                    </div>
                   )}
 
                   {/* Multiple attachments */}
                   {task?.attachments?.length > 1 && (
                     <Swiper
-                      slidesPerView="auto"
-                      spaceBetween={30}
-                      scrollbar={{ hide: true }}
-                      modules={[Scrollbar]}
-                      className="mySwiper"
-                    >
-                      {task.attachments.map((file, index) => (
-                        <SwiperSlide key={index}>
-                          {file.type === "image" ? (
-                            <img
-                              src={file.url}
-                              alt={file.filename}
-                              className="middleBodyImg"
-                              onError={(e)=> {e.target.src = '/general/images/placeholder.jpg'; e.target.alt = 'Image fail to load'}}
-                              loading="lazy"
-                            />
-                          ) : (
-                            <a
-                              href={file.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="middleBodyFile"
-                            >
-                              {file.filename}
-                            </a>
-                          )}
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
+                    slidesPerView="auto"
+                    spaceBetween={30}
+                    scrollbar={{ hide: true }}
+                    modules={[Scrollbar]}
+                    className="mySwiper"
+                  >
+                    {task.attachments.map((file, index) => (
+                     <SwiperSlide key={index}>
+                    {file.type === 'image' && 
+                    <div onClick={() => handleOpenTaskLightbox(task.attachments, index)}>
+                      <SafeImage file={file} />
+                    </div>
+                    }
+                    {file.type === 'video' && 
+                    <div onClick={() => handleOpenTaskLightbox(task.attachments, index)}>
+                      <SafeVideo file={file} />
+                    </div>
+                    }
+                    {!['image', 'video'].includes(file.type) && (
+                      <SafeFile file={file} />
+                    )}
+                  </SwiperSlide>
+                    ))}
+                  </Swiper>
                   )}
                   <span style={{fontSize: '10px', color: '#797777', display: 'flex', justifyContent: 'center'}}><i>{task?.attachments?.length ? task?.attachments?.length : ''} Attachment</i></span>
                 </>
@@ -475,6 +484,7 @@ const { onlineUsers } = useOnlineUsersStore();
           </div>
 
         <div className="right">
+          {suggestedUsers?.length > 0 && (
           <div className="rContent">
             <div>
               <div className="rHeader">
@@ -518,6 +528,7 @@ const { onlineUsers } = useOnlineUsersStore();
               </div>
             </div>
           </div>
+          )}
           <Footer />
         </div>
       </div>
@@ -536,7 +547,12 @@ const { onlineUsers } = useOnlineUsersStore();
     <ReactionsUserList reactions={reactionsData} />
   )}
 </GlassModal>
-
+<MediaLightbox
+  open={lightboxOpen}
+  close={() => setLightboxOpen(false)}
+  index={lightboxIndex}
+  media={lightboxMedia}
+/>
 
       </>
   )

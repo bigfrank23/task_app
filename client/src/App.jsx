@@ -9,13 +9,8 @@ import EditUser from './components/form/editUser/EditUser.jsx'
 import ProfileSettings from './pages/profileSettings/ProfileSettings.jsx'
 import ForgotPassword from './pages/forgotPassword/forgotPassword.jsx'
 import ResetPassword from './pages/resetPassword/ResetPassword.jsx'
-import MobileDashboard from './pages/Dashboard/MobileDashboard.jsx'
-import PerplexDashboard from './pages/Dashboard/Perplex.jsx'
-import ClaudieDashboard from './pages/Dashboard/Claudie.jsx'
 import Dashboard2 from './pages/Dashboard/Dashboard2.jsx'
 import DebugTasks from './pages/DebugTask.jsx'
-import Profile2 from './pages/profile/Profile2.jsx'
-import Messages from './pages/messages/Messages.jsx'
 import Notifications from './pages/notifications/Notifications.jsx'
 import Messages2 from './pages/messages/Messages2.jsx'
 import { SocketProvider } from './utils/SocketProvider.jsx'
@@ -36,10 +31,6 @@ function App() {
         path="/"
         element={user ? <Home /> : <Form />}
       />
-
-        <Route path='/mobile' element={user ? <MobileDashboard /> : <Navigate to="/signin" replace />} />
-        <Route path='/pmobile' element={user ? <PerplexDashboard /> : <Navigate to="/signin" replace />} />
-        <Route path='/cmobile' element={user ? <ClaudieDashboard /> : <Navigate to="/signin" replace />} />
 
       <Route
         path="/signup"

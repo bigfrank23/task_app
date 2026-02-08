@@ -100,7 +100,7 @@ export const useSuggestedUsers = (limit = 5) => {
   });
 };
 
-//get user connections
+// Get connections for current user
 export const useConnections = () => {
   return useQuery({
     queryKey: ['connections'],
@@ -108,6 +108,19 @@ export const useConnections = () => {
       const { data } = await apiRequest.get('/follow/users/me/connections');
       return data.data;
     }
+  });
+};
+
+// Get connections for any user by ID
+export const useUserConnections = (userId) => {
+  return useQuery({
+    queryKey: ['connections', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data } = await apiRequest.get(`/follow/users/${userId}/connections`);
+      return data.data;
+    },
+    enabled: !!userId
   });
 };
 

@@ -181,3 +181,67 @@ export const useDeleteCoverPhoto = () => {
     }
   });
 };
+
+// utils/useProfileHooks.js
+
+export const useUserMedia = (userId, type, page = 1, limit = 12) => {
+  return useQuery({
+    queryKey: ["media", userId, type, page],
+    queryFn: async () => {
+      const params = new URLSearchParams({
+        page,
+        limit,
+        ...(type && { type }) // Only add type if it exists
+      });
+      
+      const { data } = await apiRequest.get(
+        `/user/${userId}/media?${params.toString()}`
+      );
+      return data;
+    },
+    enabled: !!userId && !!type, // ✅ Only fetch when we have userId AND type
+    keepPreviousData: true,
+  });
+};
+
+// utils/useProfileHooks.js
+
+// Add this new hook
+export const useUserMediaCounts = (userId) => {
+  return useQuery({
+    queryKey: ["mediaCounts", userId],
+    queryFn: async () => {
+      const { data } = await apiRequest.get(`/user/${userId}/media/counts`);
+      return data;
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+};
+
+
+// utils/useProfileHooks.js
+
+export const useTrackProfileView = () => {
+  // const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (userId) => {
+      const { data } = await apiRequest.post(`/user/${userId}/view`);
+      return data;
+    }
+  });
+};
+
+export const useProfileViewers = (userId, days = 30) => {
+  return useQuery({
+    queryKey: ['profileViewers', userId, days],
+    queryFn: async () => {
+      const { data } = await apiRequest.get(
+        `/user/${userId}/viewers?days=${days}`
+      );
+      return data.data;
+    },
+    enabled: !!userId
+  });
+};
