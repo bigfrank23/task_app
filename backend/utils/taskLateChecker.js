@@ -1,56 +1,151 @@
-import cron from "node-cron";
-import Task from "../models/task.model.js";
+// utils/taskLateChecker.js
+import cron from 'node-cron';
+import Task from '../models/task.model.js';
+import Notification from '../models/notification.model.js';
 
-// Mark late tasks - runs every hour
 export const startLateTaskChecker = () => {
-  // Run every hour at minute 0
-  const job = cron.schedule("0 * * * *", async () => {
-    try {
-      console.log('[CRON] Checking for late tasks...');
-      
-      const now = new Date();
-      
-      // Find tasks that are past due and not completed or already marked late
-      const lateTasks = await Task.find({
-        dueDate: { $lt: now },
-        status: { $nin: ["completed", "late"] },
-        isArchived: false
-      });
+  console.log('📅 Late task checker started...');
 
-      if (lateTasks.length === 0) {
-        console.log('[CRON] No late tasks found');
+  // Run every hour
+  cron.schedule('0 * * * *', async () => {
+    try {
+      console.log('🔍 Checking for late tasks...');
+
+      const now = new Date();
+
+      // Find tasks that are overdue but not marked as late
+      const overdueTasks = await Task.find({
+        dueDate: { $lt: now },
+        status: { $in: ['pending', 'in_progress'] },
+        isArchived: false
+      }).populate('assignedTo createdBy', 'firstName lastName displayName');
+
+      if (overdueTasks.length === 0) {
+        console.log('✅ No overdue tasks found');
         return;
       }
 
-      // Bulk update late tasks
-      const bulkOps = lateTasks.map(task => ({
-        updateOne: {
-          filter: { _id: task._id },
-          update: {
-            $set: { status: "late" },
-            $push: {
-              statusHistory: {
-                status: "late",
-                changedAt: now,
-                // System automated change
-                changedBy: null
-              }
-            }
-          }
-        }
-      }));
+      console.log(`⚠️ Found ${overdueTasks.length} overdue tasks`);
 
-      const result = await Task.bulkWrite(bulkOps);
-      
-      console.log(`[CRON] Marked ${result.modifiedCount} tasks as late`);
+      // Update tasks to late status and create notifications
+      for (const task of overdueTasks) {
+        // Update task status to late
+        task.status = 'late';
+        task.statusHistory.push({
+          status: 'late',
+          changedBy: task.assignedTo,
+          changedAt: now
+        });
+        await task.save();
+
+        // Create notification for assigned user
+        await Notification.create({
+          recipient: task.assignedTo._id,
+          sender: task.createdBy._id,
+          type: 'task_overdue',
+          title: 'Task Overdue',
+          message: `Your task "${task.title}" is now overdue. Due date was ${new Date(task.dueDate).toLocaleDateString()}.`,
+          link: `/tasks/${task._id}`,
+          relatedTask: task._id
+        });
+
+        // If assigned to someone else, also notify the creator
+        if (task.assignedTo._id.toString() !== task.createdBy._id.toString()) {
+          await Notification.create({
+            recipient: task.createdBy._id,
+            sender: task.assignedTo._id,
+            type: 'task_overdue',
+            title: 'Task Overdue',
+            message: `Task "${task.title}" assigned to ${task.assignedTo.firstName} ${task.assignedTo.lastName} is now overdue.`,
+            link: `/tasks/${task._id}`,
+            relatedTask: task._id
+          });
+        }
+
+        console.log(`📌 Marked task "${task.title}" as late and sent notifications`);
+      }
+
+      console.log(`✅ Processed ${overdueTasks.length} late tasks`);
     } catch (error) {
-      console.error('[CRON] Error checking late tasks:', error);
+      console.error('❌ Late task checker error:', error);
     }
   });
 
-  console.log('[CRON] Late task checker started');
-  return job;
+  // Also run immediately on startup
+  setTimeout(async () => {
+    console.log('🔍 Running initial late task check...');
+    try {
+      const now = new Date();
+      const overdueTasks = await Task.find({
+        dueDate: { $lt: now },
+        status: { $in: ['pending', 'in_progress'] },
+        isArchived: false
+      });
+
+      if (overdueTasks.length > 0) {
+        console.log(`⚠️ Found ${overdueTasks.length} overdue tasks on startup`);
+        // Process them same as above...
+      }
+    } catch (error) {
+      console.error('❌ Initial late task check error:', error);
+    }
+  }, 5000); // Run 5 seconds after startup
 };
+
+
+// import cron from "node-cron";
+// import Task from "../models/task.model.js";
+
+// // Mark late tasks - runs every hour
+// export const startLateTaskChecker = () => {
+//   // Run every hour at minute 0
+//   const job = cron.schedule("0 * * * *", async () => {
+//     try {
+//       console.log('[CRON] Checking for late tasks...');
+      
+//       const now = new Date();
+      
+//       // Find tasks that are past due and not completed or already marked late
+//       const lateTasks = await Task.find({
+//         dueDate: { $lt: now },
+//         status: { $nin: ["completed", "late"] },
+//         isArchived: false
+//       });
+
+//       if (lateTasks.length === 0) {
+//         console.log('[CRON] No late tasks found');
+//         return;
+//       }
+
+//       // Bulk update late tasks
+//       const bulkOps = lateTasks.map(task => ({
+//         updateOne: {
+//           filter: { _id: task._id },
+//           update: {
+//             $set: { status: "late" },
+//             $push: {
+//               statusHistory: {
+//                 status: "late",
+//                 changedAt: now,
+//                 // System automated change
+//                 changedBy: null
+//               }
+//             }
+//           }
+//         }
+//       }));
+
+//       const result = await Task.bulkWrite(bulkOps);
+      
+//       console.log(`[CRON] Marked ${result.modifiedCount} tasks as late`);
+//     } catch (error) {
+//       console.error('[CRON] Error checking late tasks:', error);
+//     }
+//   });
+
+//   console.log('[CRON] Late task checker started');
+//   return job;
+// };
 
 // Clean up old archived tasks - runs daily at 2 AM
 export const startArchiveCleanup = () => {

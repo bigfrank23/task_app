@@ -597,3 +597,51 @@ export const getArchivedTasks = async (req, res) => {
   }
 };
 
+// ✅ CRON JOBS
+
+// Check for late tasks - runs every hour
+export const checkLateTasks = async (req, res) => {
+  try {
+    const now = new Date();
+
+    const overdueTasks = await Task.find({
+      dueDate: { $lt: now },
+      status: { $in: ['pending', 'in_progress'] },
+      isArchived: false
+    }).populate('assignedTo createdBy', 'firstName lastName displayName');
+
+    // Update all to late
+    const updates = [];
+    for (const task of overdueTasks) {
+      task.status = 'late';
+      task.statusHistory.push({
+        status: 'late',
+        changedBy: task.assignedTo,
+        changedAt: now
+      });
+      updates.push(task.save());
+
+      // Create notifications
+      await Notification.create({
+        recipient: task.assignedTo._id,
+        sender: task.createdBy._id,
+        type: 'task_overdue',
+        title: 'Task Overdue',
+        message: `Your task "${task.title}" is now overdue.`,
+        link: `/tasks/${task._id}`,
+        relatedTask: task._id
+      });
+    }
+
+    await Promise.all(updates);
+
+    res.json({
+      success: true,
+      message: `Marked ${overdueTasks.length} tasks as late`,
+      count: overdueTasks.length
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

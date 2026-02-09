@@ -8,7 +8,8 @@ import {
   deleteTask,
   archiveTask,
   upload,
-  getAllTasks
+  getAllTasks,
+  checkLateTasks
 } from "../controllers/task.controller.js";
 import { verifyToken } from "../middleware/taskMiddleware.js";
 import { rateLimiter } from "../middleware/taskMiddleware.js";
@@ -29,6 +30,7 @@ router.post("/", writeRateLimit, upload.array('attachments', 10), createTask);
 router.get("/", getAllTasks);
 router.get("/tasks", getTasks);
 router.get("/archived", getArchivedTasks);
+router.post('/check-late', verifyToken, checkLateTasks);
 router.patch("/:taskId", writeRateLimit, updateTask);
 router.patch("/:taskId/status", writeRateLimit, updateTaskStatus);
 router.patch("/:taskId/archive", writeRateLimit, archiveTask);
