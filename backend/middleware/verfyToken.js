@@ -26,12 +26,12 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js'; // Import User model
 
 export const verifyToken = async (req, res, next) => {
-  console.log('🔍 Token Debug:', {
-    cookie: req.cookies?.token?.substring(0, 20),
-    authHeader: req.headers.authorization?.substring(0, 30),
-    hasCookie: !!req.cookies?.token,
-    hasAuthHeader: !!req.headers.authorization
-  });
+  // console.log('🔍 Token Debug:', {
+  //   cookie: req.cookies?.token?.substring(0, 20),
+  //   authHeader: req.headers.authorization?.substring(0, 30),
+  //   hasCookie: !!req.cookies?.token,
+  //   hasAuthHeader: !!req.headers.authorization
+  // });
   try {
     const token = req.cookies.token;
 
