@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken'
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmailTransporter.js";
 import { isLocked } from "../utils/accountLock.js";
+import Task from "../models/task.model.js";
+import Message from "../models/message.model.js";
+import Notification from "../models/notification.model.js";
+import ProfileView from "../models/profileView.model.js";
 
 export const registerUser = async(req, res) => {
     const {displayName, firstName, lastName, email, password} = req.body
@@ -406,9 +410,10 @@ export const searchUsers = async (req, res) => {
 
 export const deleteAccount = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id || req.user._id;
 
-    const user = await User.findByIdAndDelete(userId);
+    // ✅ Find user first to verify existence
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({
@@ -417,18 +422,99 @@ export const deleteAccount = async (req, res) => {
       });
     }
 
+    // ✅ Find all tasks to delete their Cloudinary attachments
+    const userTasks = await Task.find({
+      $or: [{ createdBy: userId }, { assignedTo: userId }]
+    });
+
+    // ✅ Delete all Cloudinary files from tasks
+    const cloudinaryDeletions = [];
+    for (const task of userTasks) {
+      if (task.attachments && task.attachments.length > 0) {
+        for (const attachment of task.attachments) {
+          if (attachment.publicId) {
+            // Determine resource type based on attachment type
+            const resourceType = 
+              attachment.type === 'image' ? 'image' :
+              attachment.type === 'video' ? 'video' : 'raw';
+            
+            cloudinaryDeletions.push(
+              cloudinary.uploader.destroy(attachment.publicId, {
+                resource_type: resourceType
+              }).catch(err => {
+                console.error(`Failed to delete ${attachment.publicId}:`, err);
+              })
+            );
+          }
+        }
+      }
+    }
+
+    // ✅ Delete user's profile images from Cloudinary
+    if (user.userImage) {
+      const avatarPublicId = user.userImage.split('/').slice(-2).join('/').split('.')[0];
+      cloudinaryDeletions.push(
+        cloudinary.uploader.destroy(`todo_app/avatars/${avatarPublicId}`)
+          .catch(err => console.error('Failed to delete avatar:', err))
+      );
+    }
+
+    if (user.coverPhoto) {
+      const coverPublicId = user.coverPhoto.split('/').slice(-2).join('/').split('.')[0];
+      cloudinaryDeletions.push(
+        cloudinary.uploader.destroy(`todo_app/cover_photos/${coverPublicId}`)
+          .catch(err => console.error('Failed to delete cover:', err))
+      );
+    }
+
+    // Wait for all Cloudinary deletions
+    await Promise.all(cloudinaryDeletions);
+
+    // ✅ Delete all user-related data from database
+    await Promise.all([
+      // Delete user's tasks
+      Task.deleteMany({ createdBy: userId }),
+      
+      // Delete tasks assigned to user
+      Task.deleteMany({ assignedTo: userId }),
+      
+      // Remove user from followers/following lists
+      User.updateMany(
+        { followers: userId },
+        { $pull: { followers: userId }, $inc: { followersCount: -1 } }
+      ),
+      User.updateMany(
+        { following: userId },
+        { $pull: { following: userId }, $inc: { followingCount: -1 } }
+      ),
+      
+      // Delete user's messages
+      Message.deleteMany({ $or: [{ sender: userId }, { recipient: userId }] }),
+      
+      // Delete user's notifications
+      Notification.deleteMany({ $or: [{ sender: userId }, { recipient: userId }] }),
+      
+      // Delete profile views
+      ProfileView.deleteMany({ $or: [{ profileOwner: userId }, { viewer: userId }] }),
+      
+      // Finally, delete the user
+      User.findByIdAndDelete(userId)
+    ]);
+
+    // ✅ Clear cookie
     res.clearCookie("token", {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-});
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
 
     res.status(200).json({
       success: true,
-      message: "Account deleted successfully",
+      message: "Account and all associated data deleted successfully",
     });
 
   } catch (error) {
+    console.error("Delete account error:", error);
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -436,4 +522,3 @@ export const deleteAccount = async (req, res) => {
     });
   }
 };
-

@@ -40,7 +40,9 @@ const uploadToCloudinary = (buffer, folder = 'todo_app/tasks') => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { 
         folder,
-        resource_type: 'auto' 
+        resource_type: 'auto',
+        type: 'upload',
+        access_mode: 'public',
       },
       (error, result) => {
         if (error) reject(error);
