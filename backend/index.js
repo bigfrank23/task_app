@@ -26,7 +26,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:5173',
-  'https://taskflow-xi-seven.vercel.app/', // Add your frontend URL here
+  'https://taskflow-xi-seven.vercel.app', // Add your frontend URL here
 ];
 
 app.use(cors({
