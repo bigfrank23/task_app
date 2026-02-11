@@ -62,4 +62,4 @@ messageSchema.statics.generateConversationId = function(userId1, userId2) {
   return `${ids[0]}_${ids[1]}`;
 };
 
-export const Message = mongoose.model('Message', messageSchema);
+export default Message = mongoose.model('Message', messageSchema);
