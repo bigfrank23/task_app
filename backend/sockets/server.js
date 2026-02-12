@@ -5,7 +5,7 @@ import { setupSocket } from "./socket.js"; // Your existing handler
 export const initSocket = (server) => {
   const allowedOrigins = [
   'http://localhost:5173',
-  'https://taskflow-xi-seven.vercel.app',
+  'https://smoothtaskflow.vercel.app',
 ];
 
   const io = new Server(server, {
