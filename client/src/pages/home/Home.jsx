@@ -49,6 +49,7 @@ import GlassModal from '../../components/modal/GlassModal';
 import ReactionsUserList from '../../components/reactionsUserList/ReactionsUserList';
 import { SafeFile, SafeImage, SafeVideo } from './AttachmentFallback';
 import MediaLightbox from '../../media/mansoryGrid/MediaLightBox';
+import ScrollToTop from '../../components/scrollToTop/ScrollToTop';
 
 const Home = () => {
   const {user} = useAuthStore()
@@ -196,7 +197,7 @@ const handleOpenTaskLightbox = (attachments, startIndex) => {
             {searchQuery && (
               <div style={{ padding: '10px', background: '#f0f9ff', borderRadius: '8px', marginBottom: '20px' }}>
                 Showing results for: <strong>"{searchQuery}"</strong> 
-                <ClearIcon size={15} color='red' onClick={() => useTaskUIStore.getState().clearSearch()} style={{ marginLeft: '10px', cursor: 'pointer'}} />
+                <div onClick={() => useTaskUIStore.getState().clearSearch()} style={{ marginLeft: '10px', cursor: 'pointer', color: 'red', fontWeight: 'bold'}}>clear</div>
               </div>
             )}
 
@@ -211,7 +212,7 @@ const handleOpenTaskLightbox = (attachments, startIndex) => {
                   Error loading tasks
                 </div>
               ) : tasks.length === 0 ? (
-                <div style={{textAlign: 'center', padding: '60px 20px', color: '#111'}}> <h2>No tasks yet. Visit <Link to="/dashboard">Dashboard</Link> to create tasks.</h2></div>
+                <div style={{textAlign: 'center', padding: '60px 20px', color: '#111'}}> <p>No tasks yet. Visit <Link to="/dashboard">Dashboard</Link> to create tasks.</p></div>
               ) : (
                 tasks.map((task) => {
                   const counts = reactionCounts(task)
@@ -553,6 +554,8 @@ const handleOpenTaskLightbox = (attachments, startIndex) => {
   index={lightboxIndex}
   media={lightboxMedia}
 />
+
+<ScrollToTop/>
 
       </>
   )

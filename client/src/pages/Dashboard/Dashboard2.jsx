@@ -44,9 +44,7 @@ import { useTaskReactions } from "../../utils/useSocialInteractions";
 import ReactionsUserList from "../../components/reactionsUserList/ReactionsUserList";
 import GlassModal from "../../components/modal/GlassModal";
 import TaskInteractionModal from './TaskInteractionModal';
-import TodayTasksSidebar from "./todayTasksSideBar/TodayTasksSideBar";
 import DailyAgendaSidebar from "./todayTasksSidebar/DailyAgendaSidebar";
-import TodayAgenda from "./todayTasksSidebar/TodayAgenda";
 
 const Dashboard2 = () => {
   const { user } = useAuthStore();
@@ -446,7 +444,7 @@ const Dashboard2 = () => {
           WebkitTextFillColor: 'transparent',
           fontWeight: '800'
         }}>
-          {greeting}, {user?.displayName}
+          {greeting}, @{user?.displayName}
         </h1>
         
         <div style={{
@@ -921,26 +919,6 @@ const Dashboard2 = () => {
                 <AddCircleIcon style={{ color: '#535bf2' }} />
                 Add New Task
               </h2>
-              <button
-                onClick={() => setToggleQuill(!toggleQuill)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 20px',
-                  background: '#f3f4f6',
-                  border: 'none',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: '#374151',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {toggleQuill ? <SwitchLeftIcon /> : <SwitchRightIcon />}
-                {toggleQuill ? 'Plain Text' : 'Rich Text'}
-              </button>
             </div>
 
             {/* Priority and Due Date */}
@@ -1082,7 +1060,7 @@ const Dashboard2 = () => {
                 >
                   {/* Self */}
                   <option value={user?._id}>
-                    👤 Myself ({user?.displayName})
+                    👤 Myself (@{user?.displayName})
                   </option>
 
                   {/* Connections */}
@@ -1354,6 +1332,28 @@ const Dashboard2 = () => {
                   ))}
                 </div>
               )}
+            </div>
+            <div style={{display: 'flex', justifyContent: 'right', marginBottom: '10px'}}>
+              <button
+                onClick={() => setToggleQuill(!toggleQuill)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 20px',
+                  background: '#f3f4f6',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: '#374151',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {toggleQuill ? <SwitchLeftIcon /> : <SwitchRightIcon />}
+                {toggleQuill ? 'Plain Text' : 'Rich Text'}
+              </button>
             </div>
 
             {toggleQuill ? (

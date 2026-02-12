@@ -11,6 +11,8 @@ import './messages.css'
 import useOnlineUsersStore from '../../utils/onlineUsersStore';
 import { useSocket } from '../../utils/SocketProvider';
 import Avatar from '../../components/avatar/Avatar';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SendIcon from '@mui/icons-material/Send';
 
 // ---------- MessageBubble Component ----------
 const MessageBubble = ({ msg, isCurrentUser, isPending, onDelete, onUndo }) => {
@@ -227,6 +229,8 @@ const Messages2 = () => {
   // const [onlineUsers, setOnlineUsers] = useState({});
   const [attachments, setAttachments] = useState([]);
   const [localMessages, setLocalMessages] = useState([]);
+
+  const [showConversations, setShowConversations] = useState(true); // For mobile
 
   const { data: conversationsData } = useConversations();
   const { data: messagesData, isPending } = useMessages(selectedConversation?.conversationId || newMessageRecipient?.conversationId);
@@ -553,13 +557,20 @@ useEffect(() => {
     };
   }, []);
 
-  const activeConversation = selectedConversation || newMessageRecipient;
-
+  
   const handleConversationClick = (conv) => {
   setSelectedConversation(conv);
   setLocalMessages([]); // Clear messages when switching conversations
+  setShowConversations(false); // Hide conversations on mobile when chat is opened
 };
 
+const handleBackToConversations = () => {
+    setSelectedConversation(null);
+    setNewMessageRecipient(null);
+    setShowConversations(true);
+  };
+  
+  const activeConversation = selectedConversation || newMessageRecipient;
 
   return (
     <>
@@ -571,43 +582,62 @@ useEffect(() => {
           <div style={{ padding: '20px', borderBottom: '1px solid #e5e7eb' }}>
             <h2>Messages</h2>
           </div>
-          {conversations.map((conv) => (
-            <ConversationItem
-              key={conv._id}
-              conv={conv}
-              isSelected={selectedConversation?._id === conv._id}
-              onlineUsers={onlineUsers}
-              isTyping={usersTyping.get(conv.conversationId)}
-               onClick={() => handleConversationClick(conv)}
-            />
-          ))}
-        </div>
+          <div className="conversations-list">
+            {conversations.map((conv) => (
+              <ConversationItem
+                key={conv._id}
+                conv={conv}
+                isSelected={selectedConversation?._id === conv._id}
+                onlineUsers={onlineUsers}
+                isTyping={usersTyping.get(conv.conversationId)}
+                onClick={() => handleConversationClick(conv)}
+              />
+            ))}
+          </div>
+          </div>
 
         {/* Messages Area */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* Typing indicator */}
-                {usersTyping.get(selectedConversation?.conversationId) && (
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    gap: '5px', 
-                    color: '#6b7280',
-                    fontSize: '14px',
-                    marginLeft: '10px'
-                  }}>
-                    <span>{selectedConversation?.otherParticipant?.displayName || newMessageRecipient?.displayName} is typing</span>
-                    <div style={{ display: 'flex', gap: '2px' }}>
-                      <span style={{ animation: 'bounce 1.4s infinite' }}>.</span>
-                      <span style={{ animation: 'bounce 1.4s infinite 0.2s' }}>.</span>
-                      <span style={{ animation: 'bounce 1.4s infinite 0.4s' }}>.</span>
-                    </div>
-                  </div>
-                )}
-
+        <div className={`messages-panel ${!showConversations ? 'show' : 'hide'}`}>
           {activeConversation ? (
             <>
-              <div ref={messagesContainerRef} style={{ flex: 1, overflowY: 'auto', padding: '20px',}}>
+              {/* Chat Header */}
+              <div className="chat-header">
+                <button 
+                  className="back-button"
+                  onClick={handleBackToConversations}
+                >
+                  <ArrowBackIcon />
+                </button>
+                <Avatar
+                  image={activeConversation.otherParticipant?.userImage}
+                  name={activeConversation.otherParticipant?.displayName}
+                  isOnline={onlineUsers[activeConversation.otherParticipant?._id]}
+                  size={40}
+                />
+                <div className="chat-header-info">
+                  <h3>{activeConversation.otherParticipant?.displayName}</h3>
+                  <span className="online-status">
+                    {onlineUsers[activeConversation.otherParticipant?._id] 
+                      ? 'Online now' 
+                      : `Last seen: ${formatTime(activeConversation.otherParticipant?.lastSeen)}`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Typing Indicator */}
+              {usersTyping.get(selectedConversation?.conversationId) && (
+                <div className="typing-indicator">
+                  <span>{selectedConversation?.otherParticipant?.displayName} is typing</span>
+                  <div className="typing-dots">
+                    <span>.</span>
+                    <span>.</span>
+                    <span>.</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Messages */}
+              <div ref={messagesContainerRef} className="messages-content">
                 {localMessages.map(msg => (
                   <MessageBubble
                     key={msg._id}
@@ -619,114 +649,112 @@ useEffect(() => {
                   />
                 ))}
 
-                  {/* ✅ New Message Notification Popup */}
-                  {newMessageNotification && (
-                    <div
-                      onClick={() => scrollToMessage(newMessageNotification.messageId)}
-                      style={{
-                        position: 'fixed', // Changed from absolute to fixed
-                        top: '100px', // Position at top instead of bottom
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        background: '#535bf2',
-                        color: 'white',
-                        padding: '12px 20px',
-                        borderRadius: '25px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        zIndex: 10000,
-                        animation: 'slideUp 0.3s ease',
-                        maxWidth: '80%'
-                      }}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <strong style={{ fontSize: '14px' }}>New message from {newMessageNotification.sender}</strong>
-                        <span style={{ fontSize: '12px', opacity: 0.9 }}>{newMessageNotification.preview}</span>
-                      </div>
-                      <span style={{ fontSize: '20px' }}>↓</span>
+                {/* New Message Notification */}
+                {newMessageNotification && (
+                  <div
+                    className="new-message-notification"
+                    onClick={() => scrollToMessage(newMessageNotification.messageId)}
+                  >
+                    <div>
+                      <strong>New message from {newMessageNotification.sender}</strong>
+                      <span>{newMessageNotification.preview}</span>
                     </div>
-                  )}
+                    <span className="notification-arrow">↓</span>
+                  </div>
+                )}
 
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Send Message */}
-              <form onSubmit={handleSendMessage} style={{ padding: '20px', borderTop: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Attachments Preview */}
-                  {attachments.length > 0 && (
-                    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto' }}>
-                      {attachments.map((file, index) => (
-                        <div key={index} style={{ position: 'relative' }}>
-                          {file.type.startsWith('image/') && (
-                            <img src={URL.createObjectURL(file)} alt={file.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />
-                          )}
-                          {file.type.startsWith('video/') && (
-                            <video src={URL.createObjectURL(file)} style={{ width: 60, height: 60, borderRadius: 8 }} />
-                          )}
-                          {!file.type.startsWith('image/') && !file.type.startsWith('video/') && (
-                            <div style={{ width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', borderRadius: 8 }}>
-                              📄
-                            </div>
-                          )}
-                          <div type="button" onClick={() => removeAttachment(index)} style={{ position: 'absolute', top: -5, right: -12,
-                             borderRadius: '50%', width: 18, height: 18, cursor: 'pointer' }}>
-                            <ClearIcon color='red' size={20}/>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                      type="text"
-                      value={messageText}
-                      onChange={handleInputChange}
-                      placeholder="Type a message..."
-                      style={{ flex: 1, padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                    />
-                    <input type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} id="file-input" />
-                    <label htmlFor="file-input" style={{ padding: '12px', background: '#e5e7eb', borderRadius: '8px', cursor: 'pointer' }}><AttachmentIcon size={19}/></label>
-                    <button type="submit" disabled={!messageText.trim() && attachments.length === 0} style={{ padding: '12px 24px', background: '#535bf2', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-                     {isUploading ? 'Sending...' : 'Send'}
-                    </button>
+               {/* Send Message Form */}
+              <form onSubmit={handleSendMessage} className="message-form">
+                {/* Attachments Preview */}
+                {attachments.length > 0 && (
+                  <div className="attachments-preview">
+                    {attachments.map((file, index) => (
+                      <div key={index} className="attachment-item">
+                        {file.type.startsWith('image/') && (
+                          <img src={URL.createObjectURL(file)} alt={file.name} />
+                        )}
+                        {file.type.startsWith('video/') && (
+                          <video src={URL.createObjectURL(file)} />
+                        )}
+                        {!file.type.startsWith('image/') && !file.type.startsWith('video/') && (
+                          <div className="attachment-file">📄</div>
+                        )}
+                        <button 
+                          type="button" 
+                          onClick={() => removeAttachment(index)}
+                          className="remove-attachment"
+                        >
+                          <ClearIcon color='red' size={20}/>
+                        </button>
+                      </div>
+                    ))}
                   </div>
+                )}
+
+                <div className="message-input-container">
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={handleInputChange}
+                    placeholder="Type a message..."
+                    className="message-input"
+                  />
+                  <input 
+                    type="file" 
+                    multiple 
+                    onChange={handleFileChange} 
+                    id="file-input"
+                    className="file-input-hidden"
+                  />
+                  <label htmlFor="file-input" className="attach-button">
+                    <AttachmentIcon size={20}/>
+                  </label>
+                  <button 
+                    type="submit" 
+                    disabled={!messageText.trim() && attachments.length === 0}
+                    className="send-button"
+                  >
+                    {isUploading ? (
+                      <span className="sending">Sending...</span>
+                    ) : (
+                      <SendIcon />
+                    )}
+                  </button>
                 </div>
               </form>
             </>
           ) : conversations.length === 0 ? (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-              <p style={{ color: '#9ca3af', marginBottom: '30px' }}>No conversations yet. Start messaging someone!</p>
+            <div className="empty-state">
+              <p className="empty-message">No conversations yet. Start messaging someone!</p>
               {followingUsers.length > 0 && (
-                <div style={{ width: '100%', maxWidth: '300px' }}>
-                  <h3 style={{ marginBottom: '15px' }}>Message someone you follow</h3>
+                <div className="following-list">
+                  <h4>Message someone you follow</h4>
                   {followingUsers?.map(user => (
-                    <div key={user._id} onClick={() => setNewMessageRecipient(user)} style={{ padding: '12px', marginBottom: '8px', background: '#f3f4f6', borderRadius: '8px', cursor: 'pointer' }}>
-                      {user?.userImage ? (
-                        <div style={{ display: 'flex', gap:'5px', alignItems: 'center' }}>
-                          <img src={user.userImage} alt={user.firstName} style={{ width: '30px', height: '30px', borderRadius:'50%' }}/>
-                          <div>
-                            <p>{user.displayName}</p>
-                            <span style={{ fontSize: '12px', fontStyle: 'italic', color: '#555' }}>{user?.jobTitle}</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div>
-                          <p>{user.displayName}</p>
-                          <span style={{ fontSize: '12px', fontStyle: 'italic', color: '#555' }}>{user?.jobTitle}</span>
-                        </div>
+                    <div 
+                      key={user._id} 
+                      onClick={() => {
+                        setNewMessageRecipient(user);
+                        setShowConversations(false);
+                      }}
+                      className="following-item"
+                    >
+                      {user?.userImage && (
+                        <img src={user.userImage} alt={user.firstName} />
                       )}
+                      <div>
+                        <p>{user.displayName}</p>
+                        <span>{user?.jobTitle}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
+            <div className="select-conversation">
               Select a conversation to start messaging
             </div>
           )}

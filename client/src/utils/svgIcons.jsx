@@ -427,7 +427,7 @@ export const MongoDBIcon = ({ size = 120, className = "" }) => (
   <path
     d="M128 60v420"
     stroke="#2F7C31"
-    stroke-width="10"
+    strokeWidth="10"
   />
 </svg>
 );
@@ -439,10 +439,33 @@ export const SocketIcon = ({ size = 24, className = "" }) => (
     d="M160 256h120l-40-40 40 40-40 40"
     fill="none"
     stroke="white"
-    stroke-width="20"
-    stroke-linecap="round"
-    stroke-linejoin="round"
+    strokeWidth="20"
+    strokeLinecap="round"
+    strokeLinejoin="round"
   />
   <circle cx="360" cy="256" r="18" fill="white"/>
 </svg>
+);
+
+export const TaskFlowIcon = ({ size = 24, className = "" }) => (
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width={size} height={size} fill="currentColor" className={className}>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#667eea" stopOpacity="1"/>
+      <stop offset="100%" stopColor="#764ba2" stopOpacity="1"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="50" cy="50" r="45" fill="url(#grad)"/>
+
+  <path
+    d="M 30 50 L 43 63 L 70 36"
+    stroke="white"
+    strokeWidth="8"
+    fill="none"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />
+</svg>
+
 );

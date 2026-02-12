@@ -105,7 +105,7 @@ const SideBar = ({showEditProfile, showBottomAnalytics}) => {
               <Avatar image={follower?.userImage} name={follower?.displayName} isOnline={onlineUsers[follower._id]}/>
             </Link>
             <div className="sbConnection">
-              <h4 className='sbConnectionName'>{follower.displayName}</h4>
+              <h4 className='sbConnectionName'>@{follower.displayName}</h4>
               <p className="sbConnectionBio">
                 {follower.jobTitle?.slice(0, 50) || ''}
               </p>

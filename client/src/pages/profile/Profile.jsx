@@ -542,10 +542,10 @@ console.log('🎥 Videos for display:', allVideos);
                 ) : (
                   <>
                   <div className="profileButton">
-                    <button onClick={goToEdit}>
+                    <div onClick={goToEdit} className="editProfileBtn">
                       <EditIcon style={{ fontSize: "13px" }} />
                       Edit Profile
-                    </button>
+                    </div>
                   </div>
                   </>
                 )}
@@ -806,7 +806,7 @@ console.log('🎥 Videos for display:', allVideos);
                                       src={file.url}
                                       controls
                                       className="middleBodyImg"
-                                      style={{ borderRadius: "8px" }}
+                                      style={{ borderRadius: "8px", height: "200px", objectFit: "cover" }}
                                     />
                                   ) : (
                                     <a

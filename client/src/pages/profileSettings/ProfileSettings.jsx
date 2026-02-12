@@ -8,6 +8,7 @@ import Header from '../../components/header/Header'
 import PublicIcon from '@mui/icons-material/Public';
 import LocationPinIcon from '@mui/icons-material/LocationPin';
 import useAuthStore from "../../utils/authStore";
+import Footer from "../../components/footer/Footer";
 
 const ProfileSettings = () => {
     const {user} = useAuthStore()
@@ -59,10 +60,12 @@ const ProfileSettings = () => {
             <span className="profileSettingsHandle">@{user?.displayName}</span>
             <p className="profileSettingsLUserTitle">{user?.jobitle}</p>
             <p className="profileSettingsUserBio">{user?.bio}</p>
+            {user?.location && (
             <div className="profileSettingsLocation">
-              <LocationPinIcon className='profileSettingsLocationIcon'/>
+              <LocationPinIcon className='profileSettingsLocationIcon' style={{fontSize: '.8rem'}}/>
               <span>{user?.location}</span>
-            </div>
+            </div>)
+              }
           </div>
         </div>
         <div className="profile-settings">
@@ -74,6 +77,7 @@ const ProfileSettings = () => {
           <PasswordUpdateForm />
         </div>
       </div>
+      <div><Footer/></div>
   </div>
   );
 };

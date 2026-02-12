@@ -27,13 +27,13 @@ export const SocketProvider = ({ children }) => {
     if (!socketRef.current) {
       console.log('🔌 Initializing socket connection for user:', user._id);
       
-      const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const SOCKET_URL = import.meta.env.VITE_URL_API_ENDPOINT || 'http://localhost:8000';
 
       console.log('🔍 Socket config:', {
-  url: SOCKET_URL,
-  transports: ['polling', 'websocket'],
-  userId: user._id
-});
+      url: SOCKET_URL,
+      transports: ['polling', 'websocket'],
+      userId: user._id
+    });
       
       socketRef.current = io(SOCKET_URL, {
         query: { userId: user._id },

@@ -517,6 +517,16 @@
     max-width: 300px;
 }
 
+.editProfileBtn {
+border: 2px solid #111;
+ border-radius: 15px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
 
 /* --- Responsive Breakpoints --- */
 

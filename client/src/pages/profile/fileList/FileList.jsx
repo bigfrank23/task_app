@@ -2,7 +2,7 @@
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import './FileList.css';
+import './fileList.css';
 
 const FileList = ({ files }) => {
   const formatFileSize = (bytes) => {

@@ -40,3 +40,26 @@
 .read-the-docs {
   color: #888;
 } */
+ .app-loader {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.app-loader__logo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  /* font-weight: 600; */
+  color: #f1f1f1f1;
+}
+
+.app-loader__text {
+  opacity: 0.7;
+  font-size: 0.9rem;
+  color: #f1f1f1f1;
+}
+
