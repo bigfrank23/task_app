@@ -27,8 +27,7 @@ Where productivity meets collaboration.
 
 1. Clone the repo
 ```bash
-git clone https://github.com/yourusername/taskflow.git
-cd taskflow
+git clone https://github.com/franklinezeyim/task_app.git
 ```
 
 2. Install dependencies
