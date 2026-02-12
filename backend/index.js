@@ -15,18 +15,30 @@ import socialInteractions from './routes/social.route.js';
 import followRoutes from './routes/follow.route.js';
 import messageRoutes from './routes/message.route.js';
 import notificationRoutes from './routes/notification.route.js';
+import helmet from 'helmet';
 dotenv.config();
 
 const app = express();
 
 app.set('trust proxy', 1);
 
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, 
+}))
+
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production' && !req.secure) {
+    return res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
+
+
 
 // CORS configuration
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  'http://localhost:5173',
-  'https://taskflow-xi-seven.vercel.app', // Add your frontend URL here
+  'http://localhost:5173'
 ];
 
 app.use(cors({
@@ -50,7 +62,7 @@ app.use(cookieParser());
 app.get('/', (req, res) => {
   res.json({ 
     status: 'ok', 
-    message: 'Todo App API is running',
+    message: 'TaskFlow App API is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -58,6 +70,7 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy' });
 });
+
 
 // Routes
 app.use('/user', userRouter);
@@ -67,6 +80,7 @@ app.use('/socials', socialInteractions);
 app.use('/follow', followRoutes);
 app.use('/messages', messageRoutes);
 app.use('/notifications', notificationRoutes);
+
 
 // Start late task checker
 import { startLateTaskChecker } from './utils/taskLateChecker.js';

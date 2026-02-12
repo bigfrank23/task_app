@@ -7,7 +7,7 @@ import { loginLimiter } from '../utils/rateLimit.js';
 
 const router = express.Router()
 
-router.post('/auth/register', registerUser)
+router.post('/auth/register',loginLimiter, registerUser)
 router.post('/auth/google', googleAuth);
 router.post('/auth/login', loginLimiter, loginUser)
 router.post('/auth/logout', logoutUser)
